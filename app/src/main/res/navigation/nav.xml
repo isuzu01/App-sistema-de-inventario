@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav"
+    app:startDestination="@id/page_productos">
+
+    <fragment
+        android:id="@+id/page_productos"
+        android:name="com.example.inventarioapp.views.productos.ProductoFragment"
+        android:label="fragment_productos"
+        tools:layout="@layout/fragment_producto">
+    </fragment>
+    <fragment
+        android:id="@+id/page_proveedores"
+        android:name="com.example.inventarioapp.views.proveedores.ProveedorFragment"
+        android:label="fragment_proveedores"
+        tools:layout="@layout/fragment_proveedor">
+    </fragment>
+</navigation>

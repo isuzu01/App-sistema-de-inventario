@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/page_productos"
+        android:icon="@drawable/boton_producto"
+        android:title="Prductos"/>
+    <item
+        android:id="@+id/page_proveedores"
+        android:icon="@drawable/boton_proveedor"
+        android:title="Proveedores"/>
+</menu>
