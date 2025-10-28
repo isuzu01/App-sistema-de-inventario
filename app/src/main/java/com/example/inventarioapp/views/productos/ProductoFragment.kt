@@ -101,7 +101,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto), OnClickListenerPr
 
                 //si es editar mostrar los datos
                 if (accion == "update" && producto != null){
-                    etCodigo.setText(producto?.id.toString())
+                    etCodigo.setText(producto.id.toString())
                     etCodigo.isEnabled = false
                     etDescripcion.setText(producto.descripcion)
                     etMarca.setText(producto.marca)

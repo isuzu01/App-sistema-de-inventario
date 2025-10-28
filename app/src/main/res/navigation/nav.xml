@@ -13,6 +13,7 @@
         tools:layout="@layout/fragment_producto">
     </fragment>
 
+
     <!-- LISTADO DE PROVEEDORES -->
     <fragment
         android:id="@+id/page_proveedores"
@@ -22,37 +23,34 @@
 
         <!-- Acciones -->
         <action
-            android:id="@+id/action_to_add_proveedor"
-            app:destination="@id/page_proveedor_add"/>
-
-        <action
-            android:id="@+id/action_to_edit_proveedor"
-            app:destination="@id/page_proveedor_edit" />
+            android:id="@+id/action_to_form_proveedor"
+            app:destination="@id/page_proveedor_form"/>
 
     </fragment>
+
 
     <!-- AGREGAR PROVEEDOR -->
     <fragment
-        android:id="@+id/page_proveedor_add"
-        android:name="com.example.inventarioapp.views.proveedores.ProveedorAddFragment"
-        android:label="fragment_proveedor_add"
-        tools:layout="@layout/fragment_proveedor_add">
+        android:id="@+id/page_proveedor_form"
+        android:name="com.example.inventarioapp.views.proveedores.ProveedorFormFragment"
+        android:label="Formulario de Proveedor"
+        tools:layout="@layout/fragment_proveedor_form">
 
         <!-- Acción para regresar al listado-->
-        <action
-            android:id="@+id/action_add_to_list"
-            app:destination="@id/page_proveedores"
-            app:popUpTo="@id/page_proveedores"
-            app:popUpToInclusive="true"/>
+        <argument
+            android:name="proveedorId"
+            app:argType="long"
+            android:defaultValue="0L"/>
+
     </fragment>
 
-    <!-- EDITAR PROVEEDOR -->
+    <!-- EDITAR PROVEEDOR
     <fragment
         android:id="@+id/page_proveedor_edit"
         android:name="com.example.inventarioapp.views.proveedores.ProveedorEditFragment"
         android:label="fragment_proveedor_edit"
         tools:layout="@layout/fragment_proveedor_edit">
-
+        -->
         <!-- Acción para volver al listado
         <action
             android:id="@+id/action_edit_to_list"
@@ -64,7 +62,7 @@
         <argument
             android:name="PROVEEDOR_ID"
             app:argType="long"
-            android:defaultValue="0" />-->
-    </fragment>
+            android:defaultValue="0" />
+    </fragment>-->
 
 </navigation>

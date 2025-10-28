@@ -2,6 +2,7 @@ package com.example.inventarioapp.views.proveedores
 
 
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import android.view.View
@@ -95,22 +96,34 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
     }
 
     private fun setupSearchListener() {
-        binding.etSearch.addTextChangedListener(object : android.text.TextWatcher {
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val query = s.toString()
                 searchProveedores(query)
             }
 
-            override fun afterTextChanged(s: android.text.Editable?) {}
         })
     }
 
     private fun setupListeners() {
         binding.fabAddProveedor.setOnClickListener {
-            findNavController().navigate(R.id.action_to_add_proveedor) //========================
+            findNavController().navigate(
+                R.id.action_to_form_proveedor,
+                Bundle().apply{ putLong("proveedorId", 0L) })
         }
+    }
+
+    private fun onProveedorClick(proveedorId: Long) {
+
+         val bundle = Bundle().apply {
+            putLong("proveedorId", proveedorId)
+        }
+        findNavController().navigate(
+            R.id.action_to_form_proveedor, bundle)
+
     }
 
     private fun searchProveedores(query: String) {
@@ -123,7 +136,7 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
                     else -> proveedorDao.getAllProveedores()
                 }
             } else {
-                proveedorDao.searchProveedores("%$query%")
+                proveedorDao.searchProveedores(query)
             }
             requireActivity().runOnUiThread {
                 mAdapter.submitList(proveedores)
@@ -132,13 +145,6 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
         }
     }
 
-    private fun onProveedorClick(proveedorId: Long) {
-        //  navegar usando navcontroller
-        val bundle = Bundle().apply {
-                putLong("PROVEEDOR_ID", proveedorId)
-            }
-        findNavController().navigate(R.id.action_to_edit_proveedor, bundle)
-    }
 
 
     private fun loadAllProveedores(sortPosition: Int) {

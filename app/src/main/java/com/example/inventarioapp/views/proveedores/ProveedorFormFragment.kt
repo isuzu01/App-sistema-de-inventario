@@ -1,6 +1,5 @@
 package com.example.inventarioapp.views.proveedores
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,84 +8,115 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.inventarioapp.R
 import com.example.inventarioapp.dao.ProveedorDao
 import com.example.inventarioapp.database.InventarioDatabase
-import com.example.inventarioapp.databinding.FragmentProveedorAddBinding
+import com.example.inventarioapp.databinding.FragmentProveedorFormBinding
 import com.example.inventarioapp.entity.ProveedorEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ProveedorAddFragment : Fragment() {
+class ProveedorFormFragment : Fragment() {
 
-    private var _binding: FragmentProveedorAddBinding? = null
+    private var _binding: FragmentProveedorFormBinding? = null
     private val binding get() = _binding!!
+    private lateinit var proveedorDao: ProveedorDao
 
+    private val args: ProveedorFormFragmentArgs by navArgs()
 
-    private val proveedorDao: ProveedorDao by lazy {
-        InventarioDatabase.getInstance(requireContext()).proveedorDao()
-    }
+    private var proveedorExistente: ProveedorEntity? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentProveedorAddBinding.inflate(inflater, container, false)
+        _binding = FragmentProveedorFormBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val db = InventarioDatabase.getInstance(requireContext().applicationContext)
+        proveedorDao = db.proveedorDao()
+
+        val proveedorId = args.proveedorId
+        if (proveedorId > 0) {
+            loadProveedor(proveedorId)
+            binding.btnSave.text = "Actualizar"
+        } else {
+            binding.btnSave.text = "Guardar"
+        }
+
         // Configurar botones
-        binding.btnSave.setOnClickListener { saveProveedor() }
-        binding.btnCancel.setOnClickListener {
-
-            // Cierra el fragmento (regresa al anterior)
-            findNavController().navigate(R.id.page_proveedores)
-        }
+        binding.btnSave.setOnClickListener { saveOrUpdateProveedor() }
+        binding.btnCancel.setOnClickListener {  findNavController().navigate(R.id.page_proveedores) }
     }
-    private fun saveProveedor() {
-        if (!validateFields()) {
-            return
-        }
-        val nombreEmpresa = binding.etNombreEmpresa.text.toString().trim()
-        val ruc = binding.etRuc.text.toString().trim()
-        val esNacional = binding.cbEsNacional.isChecked
-        val direccion = binding.etDireccion.text.toString().trim()
-        val nombreContacto = binding.etNombreContacto.text.toString().trim()
-        val correo = binding.etCorreo.text.toString().trim()
-        val telefono = binding.etTelefono.text.toString().trim()
 
-        val nuevoProveedor = ProveedorEntity(
-            nombreEmpresa = nombreEmpresa,
-            ruc = ruc,
-            esNacional = esNacional,
-            direccion = direccion,
-            nombreContacto = nombreContacto,
-            correo = correo,
-            telefono = telefono
-        )
-
+    private fun loadProveedor(id:Long){
         lifecycleScope.launch(Dispatchers.IO) {
-            val id = proveedorDao.insertProveedor(nuevoProveedor)
+            val proveedor = proveedorDao.getProveedorById(id)
+            proveedorExistente = proveedor
 
-            withContext(Dispatchers.Main){
-                if (id > 0) {
-                    Toast.makeText(requireContext(), "Proveedor agregado correctamente!", Toast.LENGTH_SHORT).show()
-
-                    parentFragmentManager.setFragmentResult(
-                        "proveedor_actualizar",
-                        Bundle().apply { putBoolean("actualizar", true) })
-
-
-                } else {
-                    Toast.makeText(requireContext(), "Error al guardar el proveedor.", Toast.LENGTH_SHORT).show()
+            withContext(Dispatchers.Main) {
+                proveedor?.let {
+                    binding.etNombreEmpresa.setText(it.nombreEmpresa)
+                    binding.etRuc.setText(it.ruc)
+                    binding.cbEsNacional.isChecked = it.esNacional
+                    binding.etDireccion.setText(it.direccion)
+                    binding.etNombreContacto.setText(it.nombreContacto)
+                    binding.etCorreo.setText(it.correo)
+                    binding.etTelefono.setText(it.telefono)
                 }
-                findNavController().navigate(R.id.page_proveedores)
             }
         }
     }
+    private fun saveOrUpdateProveedor() {
+        if (!validateFields()) {
+            return
+        }
+        val proveedor = ProveedorEntity(
+            id = proveedorExistente?.id ?: 0,
+            nombreEmpresa = binding.etNombreEmpresa.text.toString().trim(),
+            ruc = binding.etRuc.text.toString().trim(),
+            esNacional = binding.cbEsNacional.isChecked,
+            direccion = binding.etDireccion.text.toString().trim(),
+            nombreContacto = binding.etNombreContacto.text.toString().trim(),
+            correo = binding.etCorreo.text.toString().trim(),
+            telefono = binding.etTelefono.text.toString().trim()
+        )
+
+        lifecycleScope.launch(Dispatchers.IO) {
+
+            if (proveedorExistente != null) {
+                proveedorDao.updateProveedor(proveedor)
+            } else {
+                proveedorDao.insertProveedor(proveedor)
+            }
+            withContext(Dispatchers.Main){
+                val mensaje = if (proveedorExistente != null)
+                                "Proveedor actualizado correctamente!"
+                            else
+                                "Proveedor agregado correctamente!"
+
+                Toast.makeText(requireContext(),  mensaje, Toast.LENGTH_SHORT).show()
+
+                parentFragmentManager.setFragmentResult(
+                    "proveedor_actualizar",
+                    Bundle().apply { putBoolean("actualizar", true) })
+
+                /*
+            } else {
+                Toast.makeText(requireContext(), "Error al guardar el proveedor.", Toast.LENGTH_SHORT).show()
+            } */
+                findNavController().navigate(R.id.page_proveedores)
+
+            }
+        }
+    }
+
     private fun validateFields(): Boolean {
         var isValid = true
 
