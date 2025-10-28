@@ -35,27 +35,6 @@ class ProveedorAdapter(
         }
     }
 
-    //override fun getItemCount(): Int= proveedores.size
-    /*
-    fun addProveedor(proveedor: Proveedor){
-        proveedores.add(proveedor)
-        notifyDataSetChanged()
-    }
-
-    fun setProveedoresList(proveedores: MutableList<Proveedor>){
-        this.proveedores = proveedores
-        notifyDataSetChanged()
-    }
-
-    fun updateProveedor(proveedor: Proveedor){
-        val index = proveedores.indexOf(proveedor)
-        if(index != -1){
-            proveedores.set(index, proveedor)
-            notifyDataSetChanged()
-        }
-
-    }
-*/
     inner class ViewHolder(val binding: ItemRvProveedorBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(proveedor: ProveedorEntity) {

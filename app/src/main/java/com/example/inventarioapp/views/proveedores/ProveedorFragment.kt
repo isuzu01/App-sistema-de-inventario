@@ -30,10 +30,7 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
     private val binding get() = _binding!!
 
     private lateinit var mAdapter: ProveedorAdapter
-
-    private val proveedorDao: ProveedorDao by lazy {
-        InventarioDatabase.getInstance(requireContext()).proveedorDao()
-    }
+    private lateinit var proveedorDao: ProveedorDao
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,7 +42,10 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Inicializar la base de datos
+    // Inicializar la base de datos
+        val db = InventarioDatabase.getInstance(requireContext().applicationContext)
+        proveedorDao = db.proveedorDao()
+
         setupRecyclerView()
         setupSpinner()
         setupSearchListener()
