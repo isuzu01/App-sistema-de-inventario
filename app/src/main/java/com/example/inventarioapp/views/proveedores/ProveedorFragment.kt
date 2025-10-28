@@ -1,7 +1,6 @@
 package com.example.inventarioapp.views.proveedores
 
-import android.app.Activity
-import android.content.Intent
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
@@ -10,49 +9,32 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.inventarioapp.Adapters.ProveedorAdapter
 import com.example.inventarioapp.R
+import com.example.inventarioapp.adapters.ProveedorAdapter
 import com.example.inventarioapp.dao.ProveedorDao
 import com.example.inventarioapp.database.InventarioDatabase
 import com.example.inventarioapp.databinding.FragmentProveedorBinding
 import com.example.inventarioapp.entity.ProveedorEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
 
     private var _binding: FragmentProveedorBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var mAdapter: ProveedorAdapter
 
     private val proveedorDao: ProveedorDao by lazy {
-        InventarioDatabase.getInstance(requireContext().applicationContext).proveedorDao()
+        InventarioDatabase.getInstance(requireContext()).proveedorDao()
     }
 
-    private val activityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val currentPosition = binding.spinnerSort.selectedItemPosition
-                loadAllProveedores(currentPosition)
-                Toast.makeText(requireContext(), "Lista de proveedores actualizada.", Toast.LENGTH_SHORT).show()
-            }
-        }
-    /*
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = FragmentProveedorBinding.inflate(layoutInflater)
-        set(binding.root)
-
-       // setupListeners()
-        setupSpinner()
-        setupSearchListener()
-       // setupRecyclerView()
-
-        loadAllProveedores(0)
-    }*/
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -69,30 +51,40 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
         setupSearchListener()
         setupListeners()
 
+        parentFragmentManager.setFragmentResultListener(
+            "proveedor_actualizar",
+            viewLifecycleOwner) { _, bundle ->
+            if (bundle.getBoolean("actualizar", false)) {
+                val currentPosition = binding.spinnerSort.selectedItemPosition
+                loadAllProveedores(currentPosition)
+                Toast.makeText(requireContext(), "Lista de proveedores actualizada.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         loadAllProveedores(0)
     }
 
     private fun setupSpinner() {
-        val adapterSpinner = ArrayAdapter.createFromResource(requireContext(),R.array.sort_options,
+        val adapterSpinner = ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.sort_options,
             android.R.layout.simple_spinner_item
         )
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
         binding.spinnerSort.adapter = adapterSpinner
 
         binding.spinnerSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 loadAllProveedores(position)
             }
-            override fun onNothingSelected(parent: AdapterView<*>) {  }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
         }
     }
 
-
     private fun setupRecyclerView() {
         mAdapter = ProveedorAdapter(
-            onClick = { proveedorId -> onProveedorClick(proveedorId) },
-            onLongClick = { proveedor ->showDeleteConfirmationDialog(proveedor)
+            onClick = { proveedorId: Long -> onProveedorClick(proveedorId) },
+            onLongClick = { proveedor: ProveedorEntity ->showDeleteConfirmationDialog(proveedor)
                 true
             }
         )
@@ -117,13 +109,12 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
 
     private fun setupListeners() {
         binding.fabAddProveedor.setOnClickListener {
-            val intent = Intent(requireContext(), ProveedorAddFragment::class.java)
-            activityResultLauncher.launch(intent)
+            findNavController().navigate(R.id.action_to_add_proveedor) //========================
         }
     }
 
     private fun searchProveedores(query: String) {
-        Thread {
+        lifecycleScope.launch(Dispatchers.IO) {
             val proveedores = if (query.isEmpty()) {
                 val ordenBusqueda = binding.spinnerSort.selectedItemPosition
                 when (ordenBusqueda) {
@@ -132,21 +123,23 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
                     else -> proveedorDao.getAllProveedores()
                 }
             } else {
-                proveedorDao.searchProveedores(query)
+                proveedorDao.searchProveedores("%$query%")
             }
             requireActivity().runOnUiThread {
                 mAdapter.submitList(proveedores)
                 updateCountProveedores(proveedores.size)
             }
-        }.start()
+        }
     }
 
     private fun onProveedorClick(proveedorId: Long) {
-        val intent = Intent(requireContext(), ProveedorEditFragment::class.java).apply {
-            putExtra("PROVEEDOR_ID", proveedorId)
-        }
-        activityResultLauncher.launch(intent)
+        //  navegar usando navcontroller
+        val bundle = Bundle().apply {
+                putLong("PROVEEDOR_ID", proveedorId)
+            }
+        findNavController().navigate(R.id.action_to_edit_proveedor, bundle)
     }
+
 
     private fun loadAllProveedores(sortPosition: Int) {
         Thread {
@@ -175,8 +168,7 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
         val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle(" Eliminar Proveedor")
             .setMessage("¿Desea eliminar al proveedor: ${proveedor.nombreEmpresa}?")
-            .setPositiveButton("Sí") { _, _ ->deleteProveedor(proveedor)
-            }
+            .setPositiveButton("Sí") { _, _ ->deleteProveedor(proveedor)}
             .setNegativeButton("No", null)
             .create()
 
@@ -194,18 +186,24 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
     }
 
     private fun deleteProveedor(proveedor: ProveedorEntity) {
-        Thread {
+        lifecycleScope.launch(Dispatchers.IO) {
             proveedorDao.deleteProveedor(proveedor)
-            requireActivity().runOnUiThread {
+
+            withContext(Dispatchers.Main) {
                 Toast.makeText(requireContext(), "Proveedor ${proveedor.nombreEmpresa} eliminado.", Toast.LENGTH_SHORT).show()
 
                 val currentPosition = binding.spinnerSort.selectedItemPosition
                 loadAllProveedores(currentPosition)
             }
-        }.start()
+        }
     }
 
     private fun updateCountProveedores(count: Int) {
         binding.tvProveedorCount.text = "$count proveedor(es) encontrado(s)"
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

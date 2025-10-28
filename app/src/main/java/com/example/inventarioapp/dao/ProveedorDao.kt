@@ -25,7 +25,7 @@ interface ProveedorDao {
     fun getProveedorById(proveedorId: Long): ProveedorEntity?
 
     @Insert
-    fun addProveedor(proveedorEntity: ProveedorEntity):Long
+    fun insertProveedor(proveedorEntity: ProveedorEntity): Long
 
     @Update
     fun updateProveedor(proveedorEntity: ProveedorEntity)

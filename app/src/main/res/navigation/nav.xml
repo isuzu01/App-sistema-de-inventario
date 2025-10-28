@@ -5,16 +5,66 @@
     android:id="@+id/nav"
     app:startDestination="@id/page_productos">
 
+    <!-- LISTADO DE PRODUCTOS -->
     <fragment
         android:id="@+id/page_productos"
         android:name="com.example.inventarioapp.views.productos.ProductoFragment"
         android:label="fragment_productos"
         tools:layout="@layout/fragment_producto">
     </fragment>
+
+    <!-- LISTADO DE PROVEEDORES -->
     <fragment
         android:id="@+id/page_proveedores"
         android:name="com.example.inventarioapp.views.proveedores.ProveedorFragment"
         android:label="fragment_proveedores"
         tools:layout="@layout/fragment_proveedor">
+
+        <!-- Acciones -->
+        <action
+            android:id="@+id/action_to_add_proveedor"
+            app:destination="@id/page_proveedor_add"/>
+
+        <action
+            android:id="@+id/action_to_edit_proveedor"
+            app:destination="@id/page_proveedor_edit" />
+
     </fragment>
+
+    <!-- AGREGAR PROVEEDOR -->
+    <fragment
+        android:id="@+id/page_proveedor_add"
+        android:name="com.example.inventarioapp.views.proveedores.ProveedorAddFragment"
+        android:label="fragment_proveedor_add"
+        tools:layout="@layout/fragment_proveedor_add">
+
+        <!-- Acción para regresar al listado-->
+        <action
+            android:id="@+id/action_add_to_list"
+            app:destination="@id/page_proveedores"
+            app:popUpTo="@id/page_proveedores"
+            app:popUpToInclusive="true"/>
+    </fragment>
+
+    <!-- EDITAR PROVEEDOR -->
+    <fragment
+        android:id="@+id/page_proveedor_edit"
+        android:name="com.example.inventarioapp.views.proveedores.ProveedorEditFragment"
+        android:label="fragment_proveedor_edit"
+        tools:layout="@layout/fragment_proveedor_edit">
+
+        <!-- Acción para volver al listado
+        <action
+            android:id="@+id/action_edit_to_list"
+            app:destination="@id/page_proveedores"
+            app:popUpTo="@id/page_proveedores"
+            app:popUpToInclusive="true" />-->
+
+        <!-- Argumento para recibir el ID
+        <argument
+            android:name="PROVEEDOR_ID"
+            app:argType="long"
+            android:defaultValue="0" />-->
+    </fragment>
+
 </navigation>

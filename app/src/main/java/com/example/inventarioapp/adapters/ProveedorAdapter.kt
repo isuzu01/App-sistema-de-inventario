@@ -1,4 +1,4 @@
-package com.example.inventarioapp.Adapters
+package com.example.inventarioapp.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
