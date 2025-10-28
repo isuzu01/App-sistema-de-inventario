@@ -1,4 +1,4 @@
-package com.example.inventarioapp.models
+package com.example.inventarioapp.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

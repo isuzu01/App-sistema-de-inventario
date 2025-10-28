@@ -1,10 +1,10 @@
 package com.example.inventarioapp.listeners
 
-import com.example.inventarioapp.models.Proveedor
+import com.example.inventarioapp.entity.ProveedorEntity
 
 interface OnClickListenerProv {
 
-    fun onClickProv(proveedor: Proveedor)
+    fun onClickProv(proveedorEntity: ProveedorEntity)
     fun onClickEmail(correo: String)
     fun onClickTelefono(telefono: String)
 }

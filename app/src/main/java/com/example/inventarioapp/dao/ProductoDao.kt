@@ -5,7 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.inventarioapp.models.Producto
+import com.example.inventarioapp.entity.Producto
 
 @Dao
 interface ProductoDao {

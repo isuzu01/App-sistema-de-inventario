@@ -1,48 +1,42 @@
 package com.example.inventarioapp.Adapters
 
-import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.inventarioapp.R
 import com.example.inventarioapp.databinding.ItemRvProveedorBinding
-import com.example.inventarioapp.listeners.OnClickListenerProv
-import com.example.inventarioapp.models.Proveedor
+import com.example.inventarioapp.entity.ProveedorEntity
 
 class ProveedorAdapter(
-    var proveedores: MutableList<Proveedor>,
-    var listener: OnClickListenerProv
-):RecyclerView.Adapter<ProveedorAdapter.ViewHolder>(){
+    private val onClick: (Long) -> Unit,
+    private val onLongClick: (ProveedorEntity) -> Boolean) :
+    ListAdapter<ProveedorEntity, ProveedorAdapter.ViewHolder>(ProveedorDiffCallback()) {
 
-    private lateinit var mContext: Context
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProveedorAdapter.ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_rv_proveedor, parent, false)
-        return ViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = ItemRvProveedorBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent, false
+        )
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val proveedor = proveedores.get(position)
+        val proveedor = getItem(position)
+        holder.bind(proveedor)
 
-        with(holder){
-            setListener(proveedor)
-            binding.tvNomProveedor.text = proveedor.nomProveedor
+        holder.binding.btnActionEdit.setOnClickListener {
+            onClick(proveedor.id)
+        }
 
-            binding.ibtnEmail.setOnClickListener {
-                listener.onClickEmail(proveedor.correo)
-            }
-            binding.ibtnTelefono.setOnClickListener {
-                listener.onClickTelefono(proveedor.telef)
-            }
-
-            //binding.tvCorreo.text = proveedor.correo
-            //binding.tvTelefono.text = proveedor.telef
+        holder.itemView.setOnLongClickListener {
+            onLongClick(proveedor)
+            true
         }
     }
 
-    override fun getItemCount(): Int= proveedores.size
-
+    //override fun getItemCount(): Int= proveedores.size
+    /*
     fun addProveedor(proveedor: Proveedor){
         proveedores.add(proveedor)
         notifyDataSetChanged()
@@ -61,15 +55,21 @@ class ProveedorAdapter(
         }
 
     }
-
-    inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        val binding = ItemRvProveedorBinding.bind(view)
-
-        fun setListener(proveedor: Proveedor){
-
-            binding.root.setOnClickListener {
-                listener.onClickProv(proveedor)
-            }
+*/
+    inner class ViewHolder(val binding: ItemRvProveedorBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(proveedor: ProveedorEntity) {
+            binding.tvNombreEmpresa.text = proveedor.nombreEmpresa
+            binding.tvCorreoProveedor.text = proveedor.correo
         }
+    }
+}
+class ProveedorDiffCallback : DiffUtil.ItemCallback<ProveedorEntity>() {
+    override fun areItemsTheSame(oldItem: ProveedorEntity, newItem: ProveedorEntity): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+    override fun areContentsTheSame(oldItem: ProveedorEntity, newItem: ProveedorEntity): Boolean {
+        return oldItem == newItem
     }
 }

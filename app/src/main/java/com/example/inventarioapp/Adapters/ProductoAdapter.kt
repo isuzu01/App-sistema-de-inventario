@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.inventarioapp.R
 import com.example.inventarioapp.databinding.ItemRvProductoBinding
 import com.example.inventarioapp.listeners.OnClickListenerProd
-import com.example.inventarioapp.models.Producto
+import com.example.inventarioapp.entity.Producto
 
 class ProductoAdapter(
     private var productos: MutableList<Producto>,

@@ -1,17 +1,40 @@
 package com.example.inventarioapp.database
 
+import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.inventarioapp.dao.ProductoDao
 import com.example.inventarioapp.dao.ProveedorDao
-import com.example.inventarioapp.models.Producto
-import com.example.inventarioapp.models.Proveedor
+import com.example.inventarioapp.entity.Producto
+import com.example.inventarioapp.entity.ProveedorEntity
 
-@Database(entities = arrayOf(
+@Database(entities = [
            Producto::class,
-           Proveedor::class
-         ), version = 1)
+           ProveedorEntity::class
+         ], version = 1)
 abstract class InventarioDatabase: RoomDatabase() {
     abstract fun productoDao(): ProductoDao
     abstract fun proveedorDao(): ProveedorDao
+
+
+    companion object {
+        @Volatile
+        private var INSTANCE: InventarioDatabase? = null
+
+        fun getInstance(context: Context): InventarioDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    InventarioDatabase::class.java,
+                    "InventarioDatabase"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+
 }

@@ -1,5 +1,21 @@
 <resources>
     <string name="app_name">InventarioApp</string>
-    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="lbl_nombre_empresa">Nombre de la empresa</string>
+    <string name="hint_nombre_empresa">Razón social / Nombre comercial</string>
+    <string name="lbl_ruc">RUC</string>
+    <string name="hint_ruc">Ingrese el número de RUC</string>
+    <string name="cb_es_nacional">Es un proveedor Nacional</string>
+    <string name="lbl_direccion">Dirección</string>
+    <string name="hint_direccion">Ingrese dirección física</string>
+    <string name="lbl_datos_contacto">Datos del contacto directo</string>
+    <string name="lbl_nombre_contacto">Ingrese el nombre del contacto</string>
+    <string name="hint_nombre_contacto">Ingrese el nombre del contacto</string>
+    <string name="lbl_correo">Correo electrónico</string>
+    <string name="hint_correo">Ingrese el correo</string>
+    <string name="lbl_telefono">Teléfono / Celular</string>
+    <string name="hint_telefono">Ingrese número de contacto</string>
+    <string name="btn_cancelar">Cancelar</string>
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

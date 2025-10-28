@@ -14,7 +14,7 @@ import com.example.inventarioapp.R
 import com.example.inventarioapp.databinding.AlertDialogProductoBinding
 import com.example.inventarioapp.databinding.FragmentProductoBinding
 import com.example.inventarioapp.listeners.OnClickListenerProd
-import com.example.inventarioapp.models.Producto
+import com.example.inventarioapp.entity.Producto
 
 
 class ProductoFragment : Fragment(R.layout.fragment_producto), OnClickListenerProd {
@@ -93,7 +93,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto), OnClickListenerPr
 
             // Cargar proveedores
             val proveedores = InventorioApplication.database.proveedorDao().getAllProveedores()
-            val nombresProveedores = proveedores.map { it.nomProveedor }
+            val nombresProveedores = proveedores.map { it.nombreEmpresa }
             requireActivity().runOnUiThread {
                 val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, nombresProveedores)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
