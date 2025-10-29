@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.R
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.inventarioapp.dao.ProductoDao
+import com.example.inventarioapp.dao.ProveedorDao
 import com.example.inventarioapp.database.InventarioDatabase
 import com.example.inventarioapp.databinding.FragmentProductoFormBinding
 import com.example.inventarioapp.entity.ProductoEntity
@@ -24,10 +25,12 @@ class ProductoFormFragment : Fragment() {
     private val binding get() = _binding!!
 
     private  lateinit var productoDao: ProductoDao
+    private  lateinit var proveedorDao: ProveedorDao
 
     private val args: ProductoFormFragmentArgs by navArgs()
     private var productoExistente: ProductoEntity? = null
 
+    val categorias = listOf("Laptop", "Mouse", "Teclado", "Otros")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,6 +44,9 @@ class ProductoFormFragment : Fragment() {
 
         val db = InventarioDatabase.getInstance(requireContext().applicationContext)
         productoDao = db.productoDao()
+        proveedorDao = db.proveedorDao()
+
+        setupSpinners()
 
         val productoId = args.productoId
         if (productoId > 0) {
@@ -52,7 +58,7 @@ class ProductoFormFragment : Fragment() {
         binding.btnSave.setOnClickListener { saveOrUpdateProducto() }
         binding.btnCancel.setOnClickListener { findNavController().navigate(
             ProductoFragmentDirections.actionToFormProducto()
-        ) }
+        )}
     }
 
 
@@ -61,6 +67,9 @@ class ProductoFormFragment : Fragment() {
             val producto = productoDao.getProductoById(id)
             productoExistente = producto
 
+            val proveedores = proveedorDao.getAllProveedores()
+            val nombresProveedores = proveedores.map { it.nombreEmpresa }
+
             withContext(Dispatchers.Main) {
                 producto?.let {
                     binding.etDescripcion.setText(it.descripcion)
@@ -68,13 +77,44 @@ class ProductoFormFragment : Fragment() {
                     binding.etModelo.setText(it.modelo)
                     binding.etPrecio.setText(it.precio.toString())
                     binding.etStock.setText(it.stock.toString())
-                    binding.spiProveedor.selectedItem.toString()
-                    binding.spiCategoria.selectedItem.toString()
+
+                    val indexCategoria = categorias.indexOf(it.nomCategoria)
+                    if (indexCategoria != -1) binding.spiCategoria.setSelection(indexCategoria)
+
+                    val indexProveedor = nombresProveedores.indexOf(it.nomProveedor)
+                    if (indexProveedor != -1) binding.spiProveedor.setSelection(indexProveedor)
+
                 }
             }
         }
     }
 
+    private fun setupSpinners() {
+
+        val categoriaAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            categorias
+        )
+        categoriaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spiCategoria.adapter = categoriaAdapter
+
+        // Spinner de proveedores (desde BD)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val proveedores = proveedorDao.getAllProveedores()
+            val nombresProveedores = proveedores.map { it.nombreEmpresa }
+
+            withContext(Dispatchers.Main) {
+                val proveedorAdapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    nombresProveedores
+                )
+                proveedorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.spiProveedor.adapter = proveedorAdapter
+            }
+        }
+    }
     private fun saveOrUpdateProducto() {
         if(!validateFields()) {return}
 
@@ -91,26 +131,36 @@ class ProductoFormFragment : Fragment() {
 
 
         lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                if (productoExistente != null) {
+                    productoDao.updateProducto(producto)
+                } else {
+                    productoDao.insertProducto(producto)
+                }
+                withContext(Dispatchers.Main) {
+                    val mensaje = if (productoExistente != null)
+                        "Producto actualizado correctamente!"
+                    else
+                        "Producto agregado correctamente!"
 
-            if (args.productoId != null) {
-                productoDao.updateProducto(producto)
-            } else {
-                productoDao.insertProducto(producto)
-            }
-            withContext(Dispatchers.Main) {
-                val mensaje = if (productoExistente != null)
-                    "Producto actualizado correctamente!"
-                else
-                    "Producto agregado correctamente!"
+                    Toast.makeText(requireContext(), mensaje, Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.setFragmentResult(
+                        "producto_actualizar",
+                        Bundle().apply { putBoolean("actualizar", true) })
 
-                Toast.makeText(requireContext(), mensaje, Toast.LENGTH_SHORT).show()
-                parentFragmentManager.setFragmentResult(
-                    "producto_actualizar",
-                    Bundle().apply { putBoolean("actualizar", true) })
+                    findNavController().navigate(
+                        ProductoFragmentDirections.actionToFormProducto()
+                    )
+                }
 
-                findNavController().navigate(
-                    ProductoFragmentDirections.actionToFormProducto()
-                )
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Error al guardar: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }

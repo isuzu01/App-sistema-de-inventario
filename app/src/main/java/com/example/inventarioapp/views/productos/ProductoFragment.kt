@@ -52,7 +52,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
         setupListeners()
 
         parentFragmentManager.setFragmentResultListener(
-            "prducto_actualizar",
+            "producto_actualizar",
             viewLifecycleOwner) { _, bundle ->
             if (bundle.getBoolean("actualizar", false)) {
                 val currentPosition = binding.spinnerSort.selectedItemPosition
