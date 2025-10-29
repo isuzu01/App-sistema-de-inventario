@@ -8,11 +8,14 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.R
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.inventarioapp.dao.ProductoDao
 import com.example.inventarioapp.dao.ProveedorDao
 import com.example.inventarioapp.database.InventarioDatabase
+import com.example.inventarioapp.databinding.FragmentProductoBinding
 import com.example.inventarioapp.databinding.FragmentProductoFormBinding
 import com.example.inventarioapp.entity.ProductoEntity
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +34,7 @@ class ProductoFormFragment : Fragment() {
     private var productoExistente: ProductoEntity? = null
 
     val categorias = listOf("Laptop", "Mouse", "Teclado", "Otros")
+    val action = ProductoFormFragmentDirections.actionBackToProductos()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,9 +60,11 @@ class ProductoFormFragment : Fragment() {
         else { binding.btnSave.text = "Guardar" }
 
         binding.btnSave.setOnClickListener { saveOrUpdateProducto() }
-        binding.btnCancel.setOnClickListener { findNavController().navigate(
-            ProductoFragmentDirections.actionToFormProducto()
-        )}
+        binding.btnCancel.setOnClickListener {
+
+            findNavController().navigate(action)
+        }
+
     }
 
 
@@ -123,10 +129,10 @@ class ProductoFormFragment : Fragment() {
             descripcion = binding.etDescripcion.text.toString().trim(),
             marca = binding.etMarca.text.toString().trim(),
             modelo = binding.etModelo.text.toString().trim(),
-            precio = binding.etPrecio.text.toString().toDouble(),
-            stock = binding.etStock.text.toString().toInt(),
-            nomProveedor = binding.spiProveedor.selectedItem.toString().trim(),
-            nomCategoria = binding.spiCategoria.selectedItem.toString().trim()
+            precio = binding.etPrecio.text.toString().toDoubleOrNull()?:0.0,
+            stock = binding.etStock.text.toString().toIntOrNull()?: 0,
+            nomProveedor = binding.spiProveedor.selectedItem?.toString()?.trim()?: "",
+            nomCategoria = binding.spiCategoria.selectedItem?.toString()?.trim()?: ""
         )
 
 
@@ -148,9 +154,7 @@ class ProductoFormFragment : Fragment() {
                         "producto_actualizar",
                         Bundle().apply { putBoolean("actualizar", true) })
 
-                    findNavController().navigate(
-                        ProductoFragmentDirections.actionToFormProducto()
-                    )
+                    findNavController().navigate(action)
                 }
 
             } catch (e: Exception) {
@@ -160,6 +164,7 @@ class ProductoFormFragment : Fragment() {
                         "Error al guardar: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
+                    e.printStackTrace()
                 }
             }
         }

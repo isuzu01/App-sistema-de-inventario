@@ -5,30 +5,6 @@
     android:id="@+id/nav"
     app:startDestination="@id/page_productos">
 
-    <!-- LISTADO DE PRODUCTOS -->
-    <fragment
-        android:id="@+id/page_productos"
-        android:name="com.example.inventarioapp.views.productos.ProductoFragment"
-        android:label="fragment_productos"
-        tools:layout="@layout/fragment_producto">
-
-        <action
-            android:id="@+id/action_to_form_producto"
-            app:destination="@id/page_producto_form"/>
-
-    </fragment>
-
-    <fragment
-        android:id="@+id/page_producto_form"
-        android:name="com.example.inventarioapp.views.productos.ProductoFormFragment"
-        android:label="formulario de productos"
-        tools:layout="@layout/fragment_producto_form">
-        <argument
-            android:name="productoId"
-            app:argType="long"
-            android:defaultValue="0L"/>
-    </fragment>
-
 
     <!-- LISTADO DE PROVEEDORES -->
     <fragment
@@ -58,6 +34,36 @@
             app:argType="long"
             android:defaultValue="0L"/>
 
+    </fragment>
+
+    <!-- LISTADO DE PRODUCTOS -->
+    <fragment
+        android:id="@+id/page_productos"
+        android:name="com.example.inventarioapp.views.productos.ProductoFragment"
+        android:label="fragment_productos"
+        tools:layout="@layout/fragment_producto">
+
+        <action
+            android:id="@+id/action_to_form_producto"
+            app:destination="@id/page_producto_form"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/page_producto_form"
+        android:name="com.example.inventarioapp.views.productos.ProductoFormFragment"
+        android:label="fragment_producto_form"
+        tools:layout="@layout/fragment_producto_form">
+        <argument
+            android:name="productoId"
+            app:argType="long"
+            android:defaultValue="0L"/>
+
+        <action
+            android:id="@+id/action_back_to_productos"
+            app:destination="@id/page_productos"
+            app:popUpTo="@id/page_productos"
+            app:popUpToInclusive="true" />
     </fragment>
 
 </navigation>
