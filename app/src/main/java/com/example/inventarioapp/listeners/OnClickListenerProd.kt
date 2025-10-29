@@ -1,7 +1,7 @@
 package com.example.inventarioapp.listeners
 
-import com.example.inventarioapp.entity.Producto
+import com.example.inventarioapp.entity.ProductoEntity
 
 interface OnClickListenerProd {
-    fun onClick(producto: Producto)
+    fun onClick(productoEntity: ProductoEntity)
 }

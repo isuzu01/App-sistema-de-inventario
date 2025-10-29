@@ -1,82 +1,62 @@
 package com.example.inventarioapp.adapters
 
-import android.content.Context
+
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.inventarioapp.R
 import com.example.inventarioapp.databinding.ItemRvProductoBinding
-import com.example.inventarioapp.listeners.OnClickListenerProd
-import com.example.inventarioapp.entity.Producto
+import com.example.inventarioapp.entity.ProductoEntity
 
 class ProductoAdapter(
-    private var productos: MutableList<Producto>,
-    private var listener: OnClickListenerProd):
-    RecyclerView.Adapter<ProductoAdapter.ViewHolder>(){
-
-    private lateinit var mContext: Context
+    private val onClick: (Long) -> Unit,
+    private val onLongClick: (ProductoEntity) -> Boolean) :
+    ListAdapter<ProductoEntity, ProductoAdapter.ViewHolder>(ProductoDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductoAdapter.ViewHolder {
-        mContext = parent.context
-
-        val view = LayoutInflater.from(mContext).inflate(R.layout.item_rv_producto, parent,false)
-        return ViewHolder(view)
+        val binding = ItemRvProductoBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent, false
+        )
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val producto = productos.get(position)
+        val producto = getItem(position)
+        holder.bind(producto)
 
-        with(holder){
-            setListener(producto)
-            binding.tvIdProducto.text = producto.id.toString()
-            binding.tvDescripcion.text = "Producto: ${producto.descripcion} ${producto.modelo}"
-            binding.tvMarca.text = "Marca: ${producto.marca}"
-            binding.tvCategoria.text = "Categoria: ${producto.nomCategoria}"
-            binding.tvNomProveedor.text = "Proveedor: ${producto.nomProveedor}"
-            binding.tvStock.text = "Stock: ${producto.stock}"
-            binding.tvPrecio.text = "Precio: ${producto.precio}"
-
+        holder.binding.cvProducto.setOnClickListener {
+            onClick(producto.id)
         }
 
+        holder.itemView.setOnLongClickListener {
+            onLongClick(producto)
+            true
+        }
     }
+    inner class ViewHolder(val binding: ItemRvProductoBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(producto: ProductoEntity) {
+            binding.tvDescripcion.text = producto.descripcion + producto.modelo
+            binding.tvMarca.text = producto.marca
+            binding.tvPrecio.text = producto.precio.toString()
+            binding.tvStock.text = producto.stock.toString()
+            binding.tvNomProveedor.text = producto.nomProveedor
+            binding.tvCategoria.text = producto.nomCategoria
 
-    override fun getItemCount(): Int = productos.size
-
-    fun add(producto: Producto) {
-        productos.add(producto)
-        notifyDataSetChanged()
-    }
-
-    fun setProductosList(productos: MutableList<Producto>){
-        this.productos = productos
-        notifyDataSetChanged()
-    }
-
-    fun  update(producto: Producto){
-        val index = productos.indexOfFirst { it.id == producto.id }
-        if(index != -1){
-            productos.set(index, producto)
-            notifyDataSetChanged()
         }
     }
 
-    fun delete(producto: Producto){
-        val index = productos.indexOf(producto)
-        if(index != -1){
-            productos.removeAt(index)
-            notifyDataSetChanged()
+    class ProductoDiffCallback : DiffUtil.ItemCallback<ProductoEntity>() {
+        override fun areItemsTheSame(oldItem: ProductoEntity, newItem: ProductoEntity): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: ProductoEntity, newItem: ProductoEntity): Boolean {
+            return oldItem == newItem
         }
     }
 
-    inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        val binding = ItemRvProductoBinding.bind(view)
-
-        fun setListener(producto: Producto){
-            binding.root.setOnClickListener {
-                listener.onClick(producto)
-            }
-        }
-    }
 
 }

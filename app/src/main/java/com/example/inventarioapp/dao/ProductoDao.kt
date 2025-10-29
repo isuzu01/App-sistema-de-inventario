@@ -5,20 +5,31 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.inventarioapp.entity.Producto
+import com.example.inventarioapp.entity.ProductoEntity
 
 @Dao
 interface ProductoDao {
 
-    @Query("SELECT * FROM Producto")
-    fun getAllProductos(): MutableList<Producto>
+    @Query("SELECT * FROM Producto  ORDER BY id ASC")
+    fun getAllProductos(): List<ProductoEntity>
+
+    @Query("SELECT * FROM Producto WHERE id = :productoId")
+    fun getProductoById(productoId: Long): ProductoEntity?
+
+    @Query("SELECT * FROM Producto WHERE descripcion LIKE :query || '%' OR id LIKE :query || '%'")
+    fun searchProductos(query: String): List<ProductoEntity>
+    @Query("SELECT * FROM Producto ORDER BY descripcion ASC")
+    fun getProductosOrderByDescripcion(): List<ProductoEntity>
+
+    @Query("SELECT * FROM Producto ORDER BY marca ASC")
+    fun getProductosOrderByMarcas(): List<ProductoEntity>
 
     @Insert
-    fun addProducto(producto: Producto)
+    fun insertProducto(productoEntity: ProductoEntity):Long
 
     @Update
-    fun updateProducto(producto: Producto)
+    fun updateProducto(productoEntity: ProductoEntity)
 
     @Delete
-    fun deleteProducto(producto: Producto)
+    fun deleteProducto(productoEntity: ProductoEntity)
 }

@@ -11,6 +11,22 @@
         android:name="com.example.inventarioapp.views.productos.ProductoFragment"
         android:label="fragment_productos"
         tools:layout="@layout/fragment_producto">
+
+        <action
+            android:id="@+id/action_to_form_producto"
+            app:destination="@id/page_producto_form"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/page_producto_form"
+        android:name="com.example.inventarioapp.views.productos.ProductoFormFragment"
+        android:label="formulario de productos"
+        tools:layout="@layout/fragment_producto_form">
+        <argument
+            android:name="productoId"
+            app:argType="long"
+            android:defaultValue="0L"/>
     </fragment>
 
 
@@ -43,26 +59,5 @@
             android:defaultValue="0L"/>
 
     </fragment>
-
-    <!-- EDITAR PROVEEDOR
-    <fragment
-        android:id="@+id/page_proveedor_edit"
-        android:name="com.example.inventarioapp.views.proveedores.ProveedorEditFragment"
-        android:label="fragment_proveedor_edit"
-        tools:layout="@layout/fragment_proveedor_edit">
-        -->
-        <!-- Acción para volver al listado
-        <action
-            android:id="@+id/action_edit_to_list"
-            app:destination="@id/page_proveedores"
-            app:popUpTo="@id/page_proveedores"
-            app:popUpToInclusive="true" />-->
-
-        <!-- Argumento para recibir el ID
-        <argument
-            android:name="PROVEEDOR_ID"
-            app:argType="long"
-            android:defaultValue="0" />
-    </fragment>-->
 
 </navigation>

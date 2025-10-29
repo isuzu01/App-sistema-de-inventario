@@ -1,230 +1,211 @@
 package com.example.inventarioapp.views.productos
 
-import android.app.AlertDialog
 import android.os.Bundle
-import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.inventarioapp.adapters.ProductoAdapter
-import com.example.inventarioapp.InventorioApplication
 import com.example.inventarioapp.R
-import com.example.inventarioapp.databinding.AlertDialogProductoBinding
+import com.example.inventarioapp.dao.ProductoDao
+import com.example.inventarioapp.database.InventarioDatabase
 import com.example.inventarioapp.databinding.FragmentProductoBinding
-import com.example.inventarioapp.listeners.OnClickListenerProd
-import com.example.inventarioapp.entity.Producto
+import com.example.inventarioapp.entity.ProductoEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
-class ProductoFragment : Fragment(R.layout.fragment_producto), OnClickListenerProd {
+class ProductoFragment : Fragment(R.layout.fragment_producto) {
 
-    private lateinit var mBinding: FragmentProductoBinding
-    private lateinit var mBindingDialog: AlertDialogProductoBinding
+    private  var _binding: FragmentProductoBinding? = null
+    private  val binding get() = _binding!!
+
     private lateinit var mAdapter: ProductoAdapter
+    private lateinit var productoDao: ProductoDao
 
-    private var mListaProd: MutableList<Producto> = mutableListOf()
-
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentProductoBinding.inflate(inflater, container, false)
+        return binding.root
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mBinding = FragmentProductoBinding.bind(view)
 
-        setupRecycleView()
+        val db = InventarioDatabase.getInstance(requireContext().applicationContext)
+        productoDao = db.productoDao()
 
-        mBinding.ibtnAdd.setOnClickListener {
-            alertDialogAddUpdate("add")
+        setupRecyclerView()
+        setupSpinner()
+        setupSearchListener()
+        setupListeners()
+
+        parentFragmentManager.setFragmentResultListener(
+            "prducto_actualizar",
+            viewLifecycleOwner) { _, bundle ->
+            if (bundle.getBoolean("actualizar", false)) {
+                val currentPosition = binding.spinnerSort.selectedItemPosition
+                loadAllProductos(currentPosition)
+                Toast.makeText(requireContext(), "Lista de producto actualizada.", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        mBinding.etBuscar.addTextChangedListener(object : TextWatcher{
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        loadAllProductos(0)
+    }
+
+    private fun setupSpinner(){
+        val adapterSpinner = ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.sort_options,
+            android.R.layout.simple_spinner_item
+        )
+        adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerSort.adapter = adapterSpinner
+        binding.spinnerSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                loadAllProductos(position)
             }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+    }
+
+    private fun setupRecyclerView() {
+        mAdapter = ProductoAdapter(
+            onClick = { productoId: Long -> onProductoClick(productoId) },
+            onLongClick = { producto: ProductoEntity ->showDeleteConfirmationDialog(producto)
+                true
+            }
+        )
+        binding.rvProductos.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = mAdapter
+        }
+    }
+
+    private fun setupSearchListener() {
+        binding.etBuscar.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {}
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s.toString()
+                searchProductos(query)
             }
-            override fun afterTextChanged(editText: Editable?) {
-                if (editText.isNullOrEmpty()){
-                    getProductos()
-                }else{
-                    filtrarListaProductos(editText.toString().trim())
-                }
-            }
+
         })
     }
 
-    private fun setupRecycleView(){
-        mBinding.rvProductos.layoutManager = LinearLayoutManager(requireActivity())
-        mAdapter = ProductoAdapter(mutableListOf(), this)
-        mBinding.rvProductos.adapter = mAdapter
-        getProductos()
+    private fun setupListeners() {
+        binding.ibtnAdd.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_to_form_producto,
+                Bundle().apply{ putLong("productoId", 0L) })
+        }
+    }
+    private fun onProductoClick(productoId: Long) {
+
+        val bundle = Bundle().apply {
+            putLong("productoId", productoId)
+        }
+        findNavController().navigate(
+            R.id.action_to_form_producto, bundle)
 
     }
 
-// funcion para crear y actualizar
-
-    private  fun alertDialogAddUpdate(accion: String, producto: Producto? = null){
-        val  builder = AlertDialog.Builder(requireContext())
-        val inflater = requireActivity().layoutInflater
-        mBindingDialog = AlertDialogProductoBinding.inflate(inflater)
-        builder.setView(mBindingDialog.root)
-
-        builder.setCancelable(false)
-
-        if(accion == "add"){
-            builder.setTitle("Agregar Producto")
-            mBindingDialog.etCodigo.visibility = View.GONE
+    private fun searchProductos(query: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val productos = if (query.isEmpty()) {
+                val ordenBusqueda = binding.spinnerSort.selectedItemPosition
+                when (ordenBusqueda) {
+                    1 -> productoDao.getProductosOrderByDescripcion()
+                    2 -> productoDao.getProductosOrderByMarcas()
+                    else -> productoDao.getAllProductos()
+                }
+            } else {
+                productoDao.searchProductos(query)
+            }
+            requireActivity().runOnUiThread {
+                mAdapter.submitList(productos)
+                updateCountProductos(productos.size)
+            }
         }
-        else{
-            builder.setTitle("Editar Producto")
-        }
+    }
 
-        val etCodigo = mBindingDialog.etCodigo
-        val etDescripcion = mBindingDialog.etDescripcion
-        val etMarca = mBindingDialog.etMarca
-        val etModelo = mBindingDialog.etModelo
-        val etPrecio = mBindingDialog.etPrecio
-        val etStock = mBindingDialog.etStock
-        val spiNomCategoria = mBindingDialog.spiCategoria
-        val spiNomProveedor = mBindingDialog.spiProveedor
 
-        // cargar categorias
-        val categorias = listOf("Lptot", "mouse", "teclado", "Otros")
-        spiNomCategoria.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categorias)
-
+    private fun loadAllProductos(sortPosition: Int) {
         Thread {
-
-            // Cargar proveedores
-            val proveedores = InventorioApplication.database.proveedorDao().getAllProveedores()
-            val nombresProveedores = proveedores.map { it.nombreEmpresa }
+            val productos = when (sortPosition) {
+                1 -> productoDao.getProductosOrderByDescripcion()
+                2 -> productoDao.getProductosOrderByMarcas()
+                else -> productoDao.getAllProductos()
+            }
             requireActivity().runOnUiThread {
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, nombresProveedores)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                spiNomProveedor.adapter = adapter
-
-                //si es editar mostrar los datos
-                if (accion == "update" && producto != null){
-                    etCodigo.setText(producto.id.toString())
-                    etCodigo.isEnabled = false
-                    etDescripcion.setText(producto.descripcion)
-                    etMarca.setText(producto.marca)
-                    etModelo.setText(producto.modelo)
-                    etPrecio.setText(producto.precio.toString())
-                    etStock.setText(producto.stock.toString())
-
-                    // Seleccionar categoría y proveedor
-                    val indexCategoria = categorias.indexOf(producto.nomCategoria)
-                    if (indexCategoria != -1) spiNomCategoria.setSelection(indexCategoria)
-
-                    // Seleccionar proveedor
-                    val indexProveedor = nombresProveedores.indexOf(producto.nomProveedor)
-                    if (indexProveedor != -1) spiNomProveedor.setSelection(indexProveedor)
-                }
+                mAdapter.submitList(productos)
+                updateCountProductos(productos.size)
             }
         }.start()
+    }
 
+    private fun showDeleteConfirmationDialog(producto: ProductoEntity) {
+        val iconDrawable = ContextCompat.getDrawable(requireContext(), android.R.drawable.ic_menu_delete)
 
-        builder.setPositiveButton("Guardar") { dialog, _ ->
-/*
-            val producto = Producto(
-                id = 0,
-                descripcion = etDescripcion.text.toString().trim(),
-                marca = etMarca.text.toString().trim(),
-                modelo = etModelo.text.toString().trim(),
-                precio = etPrecio.text.toString().toDouble(),
-                stock = etStock.text.toString().toInt(),
-                nomProveedor = spiNomProveedor.selectedItem.toString().trim(),
-                nomCategoria = spiNomCategoria.selectedItem.toString().trim()
+        iconDrawable?.let { drawable ->
+            val wrappedDrawable = DrawableCompat.wrap(drawable).mutate()
+            DrawableCompat.setTint(wrappedDrawable, ContextCompat.getColor(requireContext(), R.color.red)
             )
-            Thread {
-                if (accion == "add") {
-                    InventorioApplication.database.productoDao().addProducto(producto)
-                } else {
-                    InventorioApplication.database.productoDao().updateProducto(producto)
-                }
-
-                requireActivity().runOnUiThread {
-                    getProductos()
-                }
-            }.start()
-
-            */
-
-            when (accion) {
-                "add" -> {
-                    // Para agregar, crear producto sin ID (se autogenerará)
-                    val nuevoProducto = Producto(
-                        descripcion = etDescripcion.text.toString().trim(),
-                        marca = etMarca.text.toString().trim(),
-                        modelo = etModelo.text.toString().trim(),
-                        precio = etPrecio.text.toString().toDouble(),
-                        stock = etStock.text.toString().toInt(),
-                        nomProveedor = spiNomProveedor.selectedItem.toString().trim(),
-                        nomCategoria = spiNomCategoria.selectedItem.toString().trim()
-                    )
-
-                    Thread {
-                        InventorioApplication.database.productoDao().addProducto(nuevoProducto)
-                        requireActivity().runOnUiThread {
-                            getProductos()
-                        }
-                    }.start()
-                }
-                "update" -> {
-                    if (producto != null) {
-                        // Para actualizar, mantener el ID original
-                        val productoActualizado = Producto(
-                            id = producto.id, // Mantener el mismo ID
-                            descripcion = etDescripcion.text.toString().trim(),
-                            marca = etMarca.text.toString().trim(),
-                            modelo = etModelo.text.toString().trim(),
-                            precio = etPrecio.text.toString().toDouble(),
-                            stock = etStock.text.toString().toInt(),
-                            nomProveedor = spiNomProveedor.selectedItem.toString().trim(),
-                            nomCategoria = spiNomCategoria.selectedItem.toString().trim()
-                        )
-
-                        Thread {
-                            InventorioApplication.database.productoDao().updateProducto(productoActualizado)
-                            requireActivity().runOnUiThread {
-                                getProductos()
-                            }
-                        }.start()
-                    }
-                }
-            }
-
         }
 
-        builder.setNegativeButton("Cancelar") { dialog, _ ->
-            dialog.dismiss()
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle(" Eliminar Producto")
+            .setMessage("¿Desea eliminar el producto?: ${producto.descripcion}?")
+            .setPositiveButton("Sí") { _, _ ->deleteProducto(producto)}
+            .setNegativeButton("No", null)
+            .create()
+
+        dialog.setIcon(iconDrawable)
+
+        dialog.setOnShowListener {
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.black)
+            )
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.orange)
+            )
         }
-
-        builder.create().show()
+        dialog.show()
     }
 
-    private  fun getProductos(){
-        Thread{
-            val productos = InventorioApplication.database.productoDao().getAllProductos()
-            requireActivity().runOnUiThread {
-                mListaProd = productos.toMutableList()
-                mAdapter.setProductosList(productos)
+    private fun deleteProducto(producto: ProductoEntity) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            productoDao.deleteProducto(producto)
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "Producto ${producto.descripcion} eliminado.", Toast.LENGTH_SHORT).show()
+
+                val currentPosition = binding.spinnerSort.selectedItemPosition
+                loadAllProductos(currentPosition)
             }
-        }.start()
-
+        }
     }
 
-
-    //filtro de busqueda por nombre(descripcion del prod) y id
-    private fun filtrarListaProductos(filtro: String) {
-        val listaFiltrada = mListaProd.filter { producto ->
-            producto.id.toString().contains(filtro, true) ||
-                    producto.descripcion.contains(filtro, true)
-        }.toMutableList()
-
-        mAdapter.setProductosList(listaFiltrada)
+    private fun updateCountProductos(count: Int) {
+        binding.tvProductoCount.text = "$count Producto(s) encontrado(s)"
     }
 
-
-    override fun onClick(producto: Producto) {
-        alertDialogAddUpdate("update", producto)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
 }

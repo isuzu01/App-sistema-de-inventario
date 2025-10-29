@@ -1,98 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#FFFAFA"
     tools:context=".views.productos.ProductoFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/linearLayout"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Productos"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Administra tu inventario de Productos"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tvAgregar" />
+
+        <TextView
+            android:id="@+id/tvAgregar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agregar"
+            android:textSize="14sp"
+            android:textColor="@android:color/holo_orange_dark"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@id/ibtnAdd"
+            app:layout_constraintTop_toTopOf="@id/ibtnAdd"
+            app:layout_constraintBottom_toBottomOf="@id/ibtnAdd" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/ibtnAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@android:drawable/ic_input_add"
+            android:contentDescription="Añadir nuevo producto"
+            app:tint="@android:color/white"
+            app:backgroundTint="@android:color/holo_orange_dark"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:fabCustomSize="50dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+
+        <EditText
+            android:id="@+id/etBuscar"
+            android:layout_width="0dp"
             android:layout_height="50dp"
-            android:layout_marginStart="@dimen/common_padding_min"
-            android:layout_marginLeft="@dimen/common_padding_min"
-            android:layout_marginTop="@dimen/common_padding_min"
-            android:layout_marginEnd="@dimen/common_padding_min"
-            android:layout_marginRight="@dimen/common_padding_min"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_search_bg"
+            android:drawableStart="@android:drawable/ic_search_category_default"
+            android:drawablePadding="8dp"
+            android:elevation="1dp"
+            android:hint="Buscar por código o por nombre"
+            android:padding="8dp"
+            android:inputType="text"
+            android:textColorHint="@color/plomo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            >
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            app:layout_constraintTop_toBottomOf="@id/tvSubtitle" />
 
-                <EditText
-                    android:id="@+id/etBuscar"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/common_padding_min"
-                    android:layout_marginLeft="@dimen/common_padding_min"
-                    android:layout_marginTop="@dimen/common_padding_min"
-                    android:layout_marginEnd="@dimen/common_padding_min"
-                    android:layout_marginRight="@dimen/common_padding_min"
-                    android:hint="Buscar por código o por nombre"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ibtnBuscar"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    />
+        <TextView
+            android:id="@+id/tvSortLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ordenar por:"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/etBuscar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/spinnerSort"
+            app:layout_constraintBottom_toBottomOf="@id/spinnerSort" />
 
-                <ImageButton
-                    android:id="@+id/ibtnBuscar"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="@dimen/common_padding_min"
-                    android:layout_marginEnd="@dimen/common_padding_min"
-                    android:layout_marginRight="@dimen/common_padding_min"
-                    android:layout_marginBottom="@dimen/common_padding_min"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/ic_search"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ibtnAdd"
-                    app:layout_constraintTop_toTopOf="parent"
-                    />
+        <Spinner
+            android:id="@+id/spinnerSort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:entries="@array/sort_options"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
+            android:layout_marginStart="4dp"
+            app:layout_constraintTop_toBottomOf="@id/etBuscar"
+            app:layout_constraintStart_toEndOf="@id/tvSortLabel" />
 
-                <ImageButton
-                    android:id="@+id/ibtnAdd"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/ic_add"
-                    android:scaleType="fitCenter"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tvProductoCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="24dp"
+            tools:text="0 producto(s) encontrado(s)"
+            android:textColor="@color/plomo"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/spinnerSort" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvProductos"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            tools:listitem="@layout/item_rv_producto"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvProductoCount"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:listitem="@layout/item_rv_producto" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -6,11 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.inventarioapp.dao.ProductoDao
 import com.example.inventarioapp.dao.ProveedorDao
-import com.example.inventarioapp.entity.Producto
+import com.example.inventarioapp.entity.ProductoEntity
 import com.example.inventarioapp.entity.ProveedorEntity
 
 @Database(entities = [
-           Producto::class,
+           ProductoEntity::class,
            ProveedorEntity::class
          ], version = 1)
 abstract class InventarioDatabase: RoomDatabase() {
