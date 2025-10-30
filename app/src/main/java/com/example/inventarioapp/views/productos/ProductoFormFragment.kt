@@ -1,6 +1,9 @@
 package com.example.inventarioapp.views.productos
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +24,7 @@ import com.example.inventarioapp.entity.ProductoEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.URL
 
 class ProductoFormFragment : Fragment() {
 
@@ -36,9 +40,7 @@ class ProductoFormFragment : Fragment() {
     val categorias = listOf("Laptop", "Mouse", "Teclado", "Otros")
     val action = ProductoFormFragmentDirections.actionBackToProductos()
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProductoFormBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -51,6 +53,7 @@ class ProductoFormFragment : Fragment() {
         proveedorDao = db.proveedorDao()
 
         setupSpinners()
+        setupImageLoader()
 
         val productoId = args.productoId
         if (productoId > 0) {
@@ -60,15 +63,74 @@ class ProductoFormFragment : Fragment() {
         else { binding.btnSave.text = "Guardar" }
 
         binding.btnSave.setOnClickListener { saveOrUpdateProducto() }
-        binding.btnCancel.setOnClickListener {
+        binding.btnCancel.setOnClickListener {findNavController().navigate(action)}
 
-            findNavController().navigate(action)
+
+
+    }
+
+    private fun setupImageLoader() {
+        // Botón para cargar imagen manualmente
+        binding.btnCargarImagen.setOnClickListener {
+            loadImageFromUrl()
         }
 
+        // Cargar imagen automáticamente cuando se escribe una URL
+        binding.etImagenUrl.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                if (s?.length ?: 0 > 10) {
+                    loadImageFromUrl()
+                }
+            }
+        })
+    }
+
+    private fun loadImageFromUrl() {
+        val imageUrl = binding.etImagenUrl.text.toString().trim()
+
+        if (imageUrl.isEmpty()) {
+            Toast.makeText(requireContext(), "Ingresa una URL válida", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Validar formato de URL
+        if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+            Toast.makeText(requireContext(), "La URL debe comenzar con http:// o https://", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.progressBarImagen.visibility = View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val inputStream = URL(imageUrl).openStream()
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+
+                withContext(Dispatchers.Main) {
+                    if (bitmap != null) {
+                        binding.imgProducto.setImageBitmap(bitmap)
+                        Toast.makeText(requireContext(), "Imagen cargada correctamente", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show()
+                    }
+                    binding.progressBarImagen.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    binding.progressBarImagen.visibility = View.GONE
+                    Toast.makeText(requireContext(), "Error al cargar imagen: ${e.message}", Toast.LENGTH_SHORT).show()
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
 
     private fun loadProducto(id: Long) {
+
+
         lifecycleScope.launch(Dispatchers.IO) {
             val producto = productoDao.getProductoById(id)
             productoExistente = producto
@@ -83,6 +145,11 @@ class ProductoFormFragment : Fragment() {
                     binding.etModelo.setText(it.modelo)
                     binding.etPrecio.setText(it.precio.toString())
                     binding.etStock.setText(it.stock.toString())
+                    binding.etImagenUrl.setText(it.imagenUrl)
+
+                    if (!it.imagenUrl.isNullOrEmpty()) {
+                        loadImageFromUrl()
+                    }
 
                     val indexCategoria = categorias.indexOf(it.nomCategoria)
                     if (indexCategoria != -1) binding.spiCategoria.setSelection(indexCategoria)
@@ -132,7 +199,8 @@ class ProductoFormFragment : Fragment() {
             precio = binding.etPrecio.text.toString().toDoubleOrNull()?:0.0,
             stock = binding.etStock.text.toString().toIntOrNull()?: 0,
             nomProveedor = binding.spiProveedor.selectedItem?.toString()?.trim()?: "",
-            nomCategoria = binding.spiCategoria.selectedItem?.toString()?.trim()?: ""
+            nomCategoria = binding.spiCategoria.selectedItem?.toString()?.trim()?: "",
+            imagenUrl = binding.etImagenUrl.text.toString().trim()?:""
         )
 
 
@@ -184,22 +252,33 @@ class ProductoFormFragment : Fragment() {
             isValid = false
         }
         if (binding.etMarca.text.isNullOrEmpty()) {
-            binding.etMarca.error = "Nombre de contacto es obligatorio"
+            binding.etMarca.error = "Marca es obligatoria"
             isValid = false
         }
         if (binding.etModelo.text.isNullOrEmpty()) {
-            binding.etModelo.error = "Correo es obligatorio"
+            binding.etModelo.error = "Modelo es obligatorio"
             isValid = false
         }
         if (binding.etPrecio.text.isNullOrEmpty()) {
-            binding.etPrecio.error = "Correo es obligatorio"
+            binding.etPrecio.error = "Precio es obligatorio"
             isValid = false
+        } else {
+            val precio = binding.etPrecio.text.toString().toDoubleOrNull()
+            if (precio == null || precio <= 0) {
+                binding.etPrecio.error = "Precio debe ser mayor a 0"
+                isValid = false
+            }
         }
         if (binding.etStock.text.isNullOrEmpty()) {
-            binding.etStock.error = "Correo es obligatorio"
+            binding.etStock.error = "Stock es obligatorio"
             isValid = false
+        } else {
+            val stock = binding.etStock.text.toString().toIntOrNull()
+            if (stock == null || stock < 0) {
+                binding.etStock.error = "Stock debe ser un número válido"
+                isValid = false
+            }
         }
-
 
         return isValid
     }

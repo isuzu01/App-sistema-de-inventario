@@ -13,5 +13,6 @@ data class ProductoEntity(
     var precio: Double = 0.0,
     var stock: Int = 0,
     var nomProveedor: String ="",
-    var nomCategoria: String =""
+    var nomCategoria: String ="",
+    val imagenUrl: String? = ""
     )

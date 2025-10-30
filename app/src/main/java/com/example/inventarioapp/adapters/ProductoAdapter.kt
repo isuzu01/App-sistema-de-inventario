@@ -3,9 +3,11 @@ package com.example.inventarioapp.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.R
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.inventarioapp.databinding.ItemRvProductoBinding
 import com.example.inventarioapp.entity.ProductoEntity
 
@@ -47,6 +49,12 @@ class ProductoAdapter(
             binding.tvNomProveedor.text = producto.nomProveedor
             binding.tvCategoria.text = producto.nomCategoria
 
+            if (!producto.imagenUrl.isNullOrEmpty()) {
+                Glide.with(binding.root.context)
+                    .load(producto.imagenUrl)
+                    .centerCrop()
+                    .into(binding.imgPhoto)
+            }
         }
     }
 

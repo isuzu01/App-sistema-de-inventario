@@ -24,6 +24,7 @@ interface ProductoDao {
     @Query("SELECT * FROM Producto ORDER BY marca ASC")
     fun getProductosOrderByMarcas(): List<ProductoEntity>
 
+
     @Insert
     fun insertProducto(productoEntity: ProductoEntity):Long
 
