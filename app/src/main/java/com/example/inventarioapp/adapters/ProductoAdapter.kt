@@ -30,7 +30,7 @@ class ProductoAdapter(
             onClick(producto.id)
         }
 
-        holder.itemView.setOnLongClickListener {
+        holder.binding.cvProducto.setOnLongClickListener {
             onLongClick(producto)
             true
         }
@@ -39,8 +39,8 @@ class ProductoAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(producto: ProductoEntity) {
             binding.tvIdProducto.text = producto.id.toString()
-            binding.tvDescripcion.text = producto.descripcion.toString() + producto.modelo.toString()
-            binding.tvMarca.text = producto.marca.toString()
+            binding.tvDescripcion.text = "${producto.descripcion}  ${producto.modelo.toString()}"
+            binding.tvMarca.text = producto.marca
             binding.tvPrecio.text = producto.precio.toString()
             binding.tvStock.text = producto.stock.toString()
             binding.tvNomProveedor.text = producto.nomProveedor
