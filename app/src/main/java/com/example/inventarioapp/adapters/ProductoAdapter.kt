@@ -39,9 +39,10 @@ class ProductoAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(producto: ProductoEntity) {
             binding.tvIdProducto.text = producto.id.toString()
-            binding.tvDescripcion.text = "${producto.descripcion}  ${producto.modelo.toString()}"
+            binding.tvDescripcion.text = producto.descripcion
             binding.tvMarca.text = producto.marca
-            binding.tvPrecio.text = producto.precio.toString()
+            binding.tvModelo.text = producto.modelo
+            binding.tvPrecio.text = "S/.${producto.precio}"
             binding.tvStock.text = producto.stock.toString()
             binding.tvNomProveedor.text = producto.nomProveedor
             binding.tvCategoria.text = producto.nomCategoria

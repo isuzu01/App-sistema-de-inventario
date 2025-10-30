@@ -67,7 +67,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
     private fun setupSpinner(){
         val adapterSpinner = ArrayAdapter.createFromResource(
             requireContext(),
-            R.array.sort_options,
+            R.array.sort_options_Producto,
             android.R.layout.simple_spinner_item
         )
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -144,17 +144,23 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
 
 
     private fun loadAllProductos(sortPosition: Int) {
-        Thread {
+        lifecycleScope.launch(Dispatchers.IO) {
             val productos = when (sortPosition) {
                 1 -> productoDao.getProductosOrderByDescripcion()
                 2 -> productoDao.getProductosOrderByMarcas()
                 else -> productoDao.getAllProductos()
             }
             requireActivity().runOnUiThread {
-                mAdapter.submitList(productos)
+                binding.rvProductos.itemAnimator = null
+
+                mAdapter.submitList(productos){
+                    (binding.rvProductos.layoutManager as? LinearLayoutManager)
+                        ?.scrollToPositionWithOffset(0, 0)
+                }
+
                 updateCountProductos(productos.size)
             }
-        }.start()
+        }
     }
 
     private fun showDeleteConfirmationDialog(producto: ProductoEntity) {
