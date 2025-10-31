@@ -35,8 +35,8 @@ class ProductoFormFragment : Fragment() {
     private val args: ProductoFormFragmentArgs by navArgs()
     private var productoExistente: ProductoEntity? = null
 
-    val categorias = listOf("Laptop", "Mouse", "Teclado", "Otros")
-    val action = ProductoFormFragmentDirections.actionBackToProductos()
+    private val categorias = listOf("Laptop", "Mouse", "Teclado", "Otros")
+    private val action = ProductoFormFragmentDirections.actionBackToProductos()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -181,10 +181,8 @@ class ProductoFormFragment : Fragment() {
             try {
 
                 if (productoExistente != null) {
-                    // Actualizar producto existente
                     FirebaseProductoRepository.actualizarProductoFirebaseYRoom(productoDao, producto)
                 } else {
-                    // Insertar nuevo producto
                     FirebaseProductoRepository.insertarProductoFirebaseYRoom(productoDao, producto)
                 }
 

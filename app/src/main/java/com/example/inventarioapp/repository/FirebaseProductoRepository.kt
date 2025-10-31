@@ -20,7 +20,7 @@ object FirebaseProductoRepository {
 
     private const val TAG = "FirebaseProductoRepo"
     private var isSyncing = false
-
+/*
     suspend fun subirImagenFirebase(uri: Uri?): String? {
         if (uri == null) return null
         return try {
@@ -33,7 +33,7 @@ object FirebaseProductoRepository {
             null
         }
     }
-
+*/
     suspend fun insertarProductoFirebaseYRoom(productoDao: ProductoDao, producto: ProductoEntity) {
         withContext(Dispatchers.IO) {
 
@@ -56,10 +56,10 @@ object FirebaseProductoRepository {
     suspend fun actualizarProductoFirebaseYRoom(productoDao: ProductoDao, producto: ProductoEntity) {
         withContext(Dispatchers.IO) {
             try {
-                // 1. Actualizar en Room
+                // Actualizar en Room
                 productoDao.updateProducto(producto)
 
-                // 2. Actualizar en Firebase
+                // Actualizar en Firebase
                 val dbRef = FirebaseDatabase.getInstance().getReference("productos")
                 dbRef.child(producto.id.toString()).setValue(producto).await()
 
@@ -74,11 +74,11 @@ object FirebaseProductoRepository {
     suspend fun eliminarProductoFirebaseYRoom(productoDao: ProductoDao, producto: ProductoEntity) {
         withContext(Dispatchers.IO) {
             try {
-                // 1. Eliminar de Firebase
+                // Eliminar de Firebase
                 val dbRef = FirebaseDatabase.getInstance().getReference("productos")
                 dbRef.child(producto.id.toString()).removeValue().await()
 
-                // 2. Eliminar de Room
+                // Eliminar de Room
                 productoDao.deleteProducto(producto)
 
                 Log.d(TAG, "Producto eliminado - ID: ${producto.id}")

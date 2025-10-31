@@ -38,6 +38,9 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
     private lateinit var mAdapter: ProductoAdapter
     private lateinit var productoDao: ProductoDao
 
+    // Listener de Firebase para poder removerlo
+    private var firebaseListener: ValueEventListener? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProductoBinding.inflate(inflater, container, false)
@@ -65,14 +68,20 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
         }
 
         //loadAllProductos(0)
+        loadProductosFromFirebase()
         observarProductosEnTiempoReal()
-        //loadProductosFromFirebase()
-        //FirebaseProductoRepository.sincronizarProductosDesdeFirebase(productoDao)
+        FirebaseProductoRepository.sincronizarProductosDesdeFirebase(productoDao)
     }
 
     private fun observarProductosEnTiempoReal() {
         FirebaseProductoRepository.observarProductosEnTiempoReal { productos ->
+            // Verificar que el Fragment esté activo
+            if (!isAdded || _binding == null) return@observarProductosEnTiempoReal
+
             lifecycleScope.launch(Dispatchers.Main) {
+                //  Doble verificación antes de actualizar UI
+                if (_binding == null || !isAdded) return@launch
+
                 // Actualizar la UI con los datos de Firebase
                 mAdapter.submitList(productos)
                 updateCountProductos(productos.size)
@@ -150,9 +159,13 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
             } else {
                 productoDao.searchProductos(query)
             }
+            if (!isAdded || _binding == null) return@launch
+
             requireActivity().runOnUiThread {
-                mAdapter.submitList(productos)
-                updateCountProductos(productos.size)
+                if (_binding != null && isAdded) {
+                    mAdapter.submitList(productos)
+                    updateCountProductos(productos.size)
+                }
             }
         }
     }
@@ -162,16 +175,26 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
 
         dbRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+
+                // AGREGADO: Verificar que el Fragment esté activo
+                if (!isAdded || _binding == null) return
+
                 val productosList = mutableListOf<ProductoEntity>()
                 for (prodSnapshot in snapshot.children) {
                     val producto = prodSnapshot.getValue(ProductoEntity::class.java)
                     producto?.let { productosList.add(it) }
                 }
-                mAdapter.submitList(productosList)
-                updateCountProductos(productosList.size)
+
+                // AGREGADO: Verificar de nuevo antes de actualizar UI
+                if (_binding != null && isAdded) {
+                    mAdapter.submitList(productosList)
+                    updateCountProductos(productosList.size)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
+                // AGREGADO: Verificar que el Fragment esté activo
+                if (!isAdded || _binding == null) return
                 Toast.makeText(requireContext(), "Error al cargar datos: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -184,6 +207,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
                 2 -> productoDao.getProductosOrderByMarcas()
                 else -> productoDao.getAllProductos()
             }
+            if (!isAdded || _binding == null) return@launch
             requireActivity().runOnUiThread {
                 binding.rvProductos.itemAnimator = null
 
@@ -191,7 +215,6 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
                     (binding.rvProductos.layoutManager as? LinearLayoutManager)
                         ?.scrollToPositionWithOffset(0, 0)
                 }
-
                 updateCountProductos(productos.size)
             }
         }
@@ -231,12 +254,17 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 FirebaseProductoRepository.eliminarProductoFirebaseYRoom(productoDao, producto)
+                if (!isAdded || _binding == null) return@launch
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Producto ${producto.descripcion} eliminado.", Toast.LENGTH_SHORT).show()
-
-                    // Recargar la lista
-                    val currentPosition = binding.spinnerSort.selectedItemPosition
-                    loadAllProductos(currentPosition)
+                    if (_binding != null && isAdded) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Producto ${producto.descripcion} eliminado.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        val currentPosition = binding.spinnerSort.selectedItemPosition
+                        loadAllProductos(currentPosition)
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -260,6 +288,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
     }
 
     private fun updateCountProductos(count: Int) {
+        if (_binding == null || !isAdded) return
         binding.tvProductoCount.text = "$count Producto(s) encontrado(s)"
     }
 

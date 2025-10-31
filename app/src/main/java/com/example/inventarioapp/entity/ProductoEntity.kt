@@ -7,12 +7,17 @@ import androidx.room.PrimaryKey
 data class ProductoEntity(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0,
-    val descripcion: String,
+    var descripcion: String,
     var marca: String = "",
     var modelo: String = "",
     var precio: Double = 0.0,
     var stock: Int = 0,
     var nomProveedor: String ="",
     var nomCategoria: String ="",
-    val imagenUrl: String = ""
+    var imagenUrl: String = ""
     )
+{
+    // Constructor vacío requerido por Firebase
+    constructor() : this(0, "", "", "", 0.0, 0, "", "", "")
+
+}
