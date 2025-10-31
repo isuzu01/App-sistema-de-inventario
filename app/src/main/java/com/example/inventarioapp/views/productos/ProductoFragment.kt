@@ -20,6 +20,11 @@ import com.example.inventarioapp.dao.ProductoDao
 import com.example.inventarioapp.database.InventarioDatabase
 import com.example.inventarioapp.databinding.FragmentProductoBinding
 import com.example.inventarioapp.entity.ProductoEntity
+import com.example.inventarioapp.repository.FirebaseProductoRepository
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,9 +39,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
     private lateinit var productoDao: ProductoDao
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProductoBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -61,7 +64,20 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
             }
         }
 
-        loadAllProductos(0)
+        //loadAllProductos(0)
+        observarProductosEnTiempoReal()
+        //loadProductosFromFirebase()
+        //FirebaseProductoRepository.sincronizarProductosDesdeFirebase(productoDao)
+    }
+
+    private fun observarProductosEnTiempoReal() {
+        FirebaseProductoRepository.observarProductosEnTiempoReal { productos ->
+            lifecycleScope.launch(Dispatchers.Main) {
+                // Actualizar la UI con los datos de Firebase
+                mAdapter.submitList(productos)
+                updateCountProductos(productos.size)
+            }
+        }
     }
 
     private fun setupSpinner(){
@@ -82,7 +98,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
 
     private fun setupRecyclerView() {
         mAdapter = ProductoAdapter(
-            onClick = { productoId: Long -> onProductoClick(productoId) },
+            onClick = { productoId:Long -> onProductoClick(productoId) },
             onLongClick = { producto: ProductoEntity ->showDeleteConfirmationDialog(producto)
                 true
             }
@@ -114,7 +130,6 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
         }
     }
     private fun onProductoClick(productoId: Long) {
-
         val bundle = Bundle().apply {
             putLong("productoId", productoId)
         }
@@ -142,6 +157,25 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
         }
     }
 
+    private fun loadProductosFromFirebase() {
+        val dbRef = FirebaseDatabase.getInstance().getReference("productos")
+
+        dbRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val productosList = mutableListOf<ProductoEntity>()
+                for (prodSnapshot in snapshot.children) {
+                    val producto = prodSnapshot.getValue(ProductoEntity::class.java)
+                    producto?.let { productosList.add(it) }
+                }
+                mAdapter.submitList(productosList)
+                updateCountProductos(productosList.size)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(requireContext(), "Error al cargar datos: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
     private fun loadAllProductos(sortPosition: Int) {
         lifecycleScope.launch(Dispatchers.IO) {
@@ -193,7 +227,25 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
     }
 
     private fun deleteProducto(producto: ProductoEntity) {
+
         lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                FirebaseProductoRepository.eliminarProductoFirebaseYRoom(productoDao, producto)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Producto ${producto.descripcion} eliminado.", Toast.LENGTH_SHORT).show()
+
+                    // Recargar la lista
+                    val currentPosition = binding.spinnerSort.selectedItemPosition
+                    loadAllProductos(currentPosition)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+       /* lifecycleScope.launch(Dispatchers.IO) {
             productoDao.deleteProducto(producto)
 
             withContext(Dispatchers.Main) {
@@ -203,6 +255,8 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
                 loadAllProductos(currentPosition)
             }
         }
+
+        */
     }
 
     private fun updateCountProductos(count: Int) {

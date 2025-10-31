@@ -54,6 +54,8 @@ class ProductoAdapter(
                     .load(producto.imagenUrl)
                     .centerCrop()
                     .into(binding.imgPhoto)
+            }else {
+                binding.imgPhoto.setImageResource(android.R.drawable.ic_menu_gallery)
             }
         }
     }

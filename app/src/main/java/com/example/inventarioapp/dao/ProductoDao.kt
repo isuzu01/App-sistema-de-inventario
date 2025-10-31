@@ -3,6 +3,7 @@ package com.example.inventarioapp.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.inventarioapp.entity.ProductoEntity
@@ -13,9 +14,6 @@ interface ProductoDao {
     @Query("SELECT * FROM Producto  ORDER BY id ASC")
     fun getAllProductos(): List<ProductoEntity>
 
-    @Query("SELECT * FROM Producto WHERE id = :productoId")
-    fun getProductoById(productoId: Long): ProductoEntity?
-
     @Query("SELECT * FROM Producto WHERE descripcion LIKE :query || '%' OR id LIKE :query || '%'")
     fun searchProductos(query: String): List<ProductoEntity>
     @Query("SELECT * FROM Producto ORDER BY descripcion ASC")
@@ -24,8 +22,10 @@ interface ProductoDao {
     @Query("SELECT * FROM Producto ORDER BY marca ASC")
     fun getProductosOrderByMarcas(): List<ProductoEntity>
 
+    @Query("SELECT * FROM Producto WHERE id = :productoId")
+    fun getProductoById(productoId: Long): ProductoEntity?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertProducto(productoEntity: ProductoEntity):Long
 
     @Update
@@ -33,4 +33,7 @@ interface ProductoDao {
 
     @Delete
     fun deleteProducto(productoEntity: ProductoEntity)
+
+    @Query("DELETE FROM Producto")
+    fun clearAllProductos()
 }

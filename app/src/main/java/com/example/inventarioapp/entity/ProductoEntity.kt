@@ -14,5 +14,5 @@ data class ProductoEntity(
     var stock: Int = 0,
     var nomProveedor: String ="",
     var nomCategoria: String ="",
-    val imagenUrl: String? = ""
+    val imagenUrl: String = ""
     )

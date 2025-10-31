@@ -253,6 +253,7 @@
                         android:contentDescription="Imagen del producto"
                         android:layout_marginBottom="12dp" />
 
+
                     <!-- Botón para cargar imagen -->
                     <Button
                         android:id="@+id/btnCargarImagen"

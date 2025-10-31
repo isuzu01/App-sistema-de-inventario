@@ -11,16 +11,14 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.R
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.inventarioapp.dao.ProductoDao
 import com.example.inventarioapp.dao.ProveedorDao
 import com.example.inventarioapp.database.InventarioDatabase
-import com.example.inventarioapp.databinding.FragmentProductoBinding
 import com.example.inventarioapp.databinding.FragmentProductoFormBinding
 import com.example.inventarioapp.entity.ProductoEntity
+import com.example.inventarioapp.repository.FirebaseProductoRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,6 +37,7 @@ class ProductoFormFragment : Fragment() {
 
     val categorias = listOf("Laptop", "Mouse", "Teclado", "Otros")
     val action = ProductoFormFragmentDirections.actionBackToProductos()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProductoFormBinding.inflate(inflater, container, false)
@@ -48,7 +47,7 @@ class ProductoFormFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val db = InventarioDatabase.getInstance(requireContext().applicationContext)
+        val db = InventarioDatabase.getInstance(requireContext())
         productoDao = db.productoDao()
         proveedorDao = db.proveedorDao()
 
@@ -65,63 +64,43 @@ class ProductoFormFragment : Fragment() {
         binding.btnSave.setOnClickListener { saveOrUpdateProducto() }
         binding.btnCancel.setOnClickListener {findNavController().navigate(action)}
 
-
-
     }
 
     private fun setupImageLoader() {
-        // Botón para cargar imagen manualmente
         binding.btnCargarImagen.setOnClickListener {
             loadImageFromUrl()
         }
 
-        // Cargar imagen automáticamente cuando se escribe una URL
+        // Cargar imagen automáticamente
         binding.etImagenUrl.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                if (s?.length ?: 0 > 10) {
+                if (!s.isNullOrEmpty() && s.length > 10) {
                     loadImageFromUrl()
                 }
             }
         })
     }
 
+
     private fun loadImageFromUrl() {
         val imageUrl = binding.etImagenUrl.text.toString().trim()
 
-        if (imageUrl.isEmpty()) {
-            Toast.makeText(requireContext(), "Ingresa una URL válida", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Validar formato de URL
-        if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
-            Toast.makeText(requireContext(), "La URL debe comenzar con http:// o https://", Toast.LENGTH_SHORT).show()
-            return
-        }
+        if (imageUrl.isEmpty()) { return }
 
         binding.progressBarImagen.visibility = View.VISIBLE
-
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val inputStream = URL(imageUrl).openStream()
-                val bitmap = BitmapFactory.decodeStream(inputStream)
-
+                val bitmap = BitmapFactory.decodeStream(URL(imageUrl).openStream())
                 withContext(Dispatchers.Main) {
-                    if (bitmap != null) {
-                        binding.imgProducto.setImageBitmap(bitmap)
-                        Toast.makeText(requireContext(), "Imagen cargada correctamente", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(requireContext(), "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show()
-                    }
+                    binding.imgProducto.setImageBitmap(bitmap)
                     binding.progressBarImagen.visibility = View.GONE
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     binding.progressBarImagen.visibility = View.GONE
-                    Toast.makeText(requireContext(), "Error al cargar imagen: ${e.message}", Toast.LENGTH_SHORT).show()
-                    e.printStackTrace()
+                    Toast.makeText(requireContext(), "Error al cargar imagen", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -129,8 +108,6 @@ class ProductoFormFragment : Fragment() {
 
 
     private fun loadProducto(id: Long) {
-
-
         lifecycleScope.launch(Dispatchers.IO) {
             val producto = productoDao.getProductoById(id)
             productoExistente = producto
@@ -146,10 +123,6 @@ class ProductoFormFragment : Fragment() {
                     binding.etPrecio.setText(it.precio.toString())
                     binding.etStock.setText(it.stock.toString())
                     binding.etImagenUrl.setText(it.imagenUrl)
-
-                    if (!it.imagenUrl.isNullOrEmpty()) {
-                        loadImageFromUrl()
-                    }
 
                     val indexCategoria = categorias.indexOf(it.nomCategoria)
                     if (indexCategoria != -1) binding.spiCategoria.setSelection(indexCategoria)
@@ -192,49 +165,49 @@ class ProductoFormFragment : Fragment() {
         if(!validateFields()) {return}
 
         val producto = ProductoEntity(
-            id = productoExistente?.id?: 0,
+            id = productoExistente?.id ?: 0,
             descripcion = binding.etDescripcion.text.toString().trim(),
             marca = binding.etMarca.text.toString().trim(),
             modelo = binding.etModelo.text.toString().trim(),
             precio = binding.etPrecio.text.toString().toDoubleOrNull()?:0.0,
             stock = binding.etStock.text.toString().toIntOrNull()?: 0,
-            nomProveedor = binding.spiProveedor.selectedItem?.toString()?.trim()?: "",
+            nomProveedor = binding.spiProveedor.selectedItem?.toString()?.trim()?: "Sin proveedor",
             nomCategoria = binding.spiCategoria.selectedItem?.toString()?.trim()?: "",
-            imagenUrl = binding.etImagenUrl.text.toString().trim()?:""
+            imagenUrl = binding.etImagenUrl.text.toString().trim()
         )
 
-
         lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                if (productoExistente != null) {
-                    productoDao.updateProducto(producto)
-                } else {
-                    productoDao.insertProducto(producto)
-                }
-                withContext(Dispatchers.Main) {
-                    val mensaje = if (productoExistente != null)
-                        "Producto actualizado correctamente!"
-                    else
-                        "Producto agregado correctamente!"
 
-                    Toast.makeText(requireContext(), mensaje, Toast.LENGTH_SHORT).show()
+            try {
+
+                if (productoExistente != null) {
+                    // Actualizar producto existente
+                    FirebaseProductoRepository.actualizarProductoFirebaseYRoom(productoDao, producto)
+                } else {
+                    // Insertar nuevo producto
+                    FirebaseProductoRepository.insertarProductoFirebaseYRoom(productoDao, producto)
+                }
+
+                //FirebaseProductoRepository.insertarProductoFirebaseYRoom(productoDao, producto)
+
+                withContext(Dispatchers.Main) {
+                    val msg = if (productoExistente != null) "Producto actualizado" else "Producto agregado"
+                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+
+                    // Notificar actualización
                     parentFragmentManager.setFragmentResult(
                         "producto_actualizar",
-                        Bundle().apply { putBoolean("actualizar", true) })
-
+                        Bundle().apply { putBoolean("actualizar", true) }
+                    )
                     findNavController().navigate(action)
                 }
-
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Error al guardar: ${e.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                     e.printStackTrace()
                 }
             }
+
         }
     }
 
