@@ -25,7 +25,7 @@ class WelcomeFragment : Fragment() {
     private var _binding: FragmentWelcomeBinding? = null
     private val binding get() = _binding!!
 
-//
+    //
     private lateinit var productoDao: ProductoDao
     private lateinit var productoBajoStockAdapter: ProductoAdapter
 
@@ -47,43 +47,73 @@ class WelcomeFragment : Fragment() {
         return binding.root
     }
 
-//datos del carrusel
+    //conócenos
+    private fun getInfoEmpresa(): List<Tendencia> {
+        return listOf(
+            Tendencia(
+                titulo = "Nuestra Misión",
+                fuente = "Líderes en tecnología, soporte y calidad.",
+                imagenResId = R.drawable.infoempresa_mision
+            ),
+            Tendencia(
+                titulo = "Visión 2028",
+                fuente = "Ser el referente N°1 en distribución de laptops.",
+                imagenResId = R.drawable.infoempresa_vision
+            ),
+            Tendencia(
+                titulo = "Soporte Técnico",
+                fuente = "Servicio premium 24/7 para todos nuestros clientes.",
+                imagenResId = R.drawable.infoempresa_soporte
+            ),
+            Tendencia(
+                titulo = "Garantía Extendida",
+                fuente = "Cobertura de hasta 3 años en todos los equipos.",
+                imagenResId = R.drawable.infoempresa_garantia
+            ),
+            Tendencia(
+                titulo = "Showrooms y Tiendas",
+                fuente = "Visítanos en nuestras 5 ubicaciones a nivel nacional.",
+                imagenResId = R.drawable.infoempresa_tiendas
+            ),
+            Tendencia(
+                titulo = "Opciones de Pago",
+                fuente = "Financiamiento hasta 12 meses sin intereses.",
+                imagenResId = R.drawable.infoempresa_pago
+            )
+        )
+    }
+
+    //datos del carrusel
     private fun getTendenciasFijas(): List<Tendencia> {
         return listOf(
             Tendencia("El futuro de la IA: ¿Cómo será mañana?", "The National", R.drawable.tendencia_ia),
             Tendencia("Intel lanza la nueva generación de chips", "Reuters Tech", R.drawable.tendencia_chips),
             Tendencia("5 claves para mantener la seguridad de tu laptop", "Tech Magazine", R.drawable.tendencia_seguridad),
             Tendencia("Las mejores laptops gaming del 2025", "PC Gamer", R.drawable.tendencia_laptops),
-            Tendencia("El nuevo estándar de velocidad en SSDs", "Hardware Insider", R.drawable.tendencia_ssd), // Usa tu nuevo nombre de imagen
-            Tendencia("Por qué el 5G cambiará el trabajo remoto", "World Telecom", R.drawable.tendencia_5g), // Usa tu nuevo nombre de imagen
-            Tendencia("Los retos de la ciberseguridad en 2026", "Security Today", R.drawable.tendencia_ciber), // Usa tu nuevo nombre de imagen
+            Tendencia("El nuevo estándar de velocidad en SSDs", "Hardware Insider", R.drawable.tendencia_ssd),
+            Tendencia("Por qué el 5G cambiará el trabajo remoto", "World Telecom", R.drawable.tendencia_5g),
+            Tendencia("Los retos de la ciberseguridad en 2026", "Security Today", R.drawable.tendencia_ciber),
         )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val infoEmpresa = getInfoEmpresa()
+        val infoAdapter = TendenciaAdapter(infoEmpresa)
         val tendencias = getTendenciasFijas()
         val tendenciasAdapter = TendenciaAdapter(tendencias)
+
+        binding.rvInformacionEmpresa.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = infoAdapter
+        }
 
         binding.rvTendencias.apply {
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             adapter = tendenciasAdapter
         }
 
-// Botón "Lista de Inventario"
-        binding.btnInventario.setOnClickListener {
-            findNavController().navigate(R.id.page_productos)
-        }
 
-// Botón "Charts"
-        binding.btnCharts.setOnClickListener {
-            Toast.makeText(requireContext(), "Abrir estadísticas", Toast.LENGTH_SHORT).show()
-        }
-
-//Botón "Dashboard"
-        binding.btnDashboard.setOnClickListener {
-            Toast.makeText(requireContext(), "Ir al panel general", Toast.LENGTH_SHORT).show()
-        }
 
 // Texto "Ver"
         binding.tvVerTodo.setOnClickListener {
