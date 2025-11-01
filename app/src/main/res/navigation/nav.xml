@@ -3,7 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav"
-    app:startDestination="@id/page_productos">
+    app:startDestination="@id/page_welcome">
+
+
+    <fragment
+        android:id="@+id/page_welcome"
+        android:name="com.example.inventarioapp.views.welcome.WelcomeFragment"
+        android:label="Bienvenida"
+        tools:layout="@layout/fragment_welcome" />
 
 
     <!-- LISTADO DE PROVEEDORES -->

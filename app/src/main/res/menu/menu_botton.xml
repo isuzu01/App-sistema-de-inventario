@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/page_welcome"
+        android:icon="@drawable/boton_inicio"
+        android:title="Inicio"/>
     <item
         android:id="@+id/page_productos"
         android:icon="@drawable/boton_producto"

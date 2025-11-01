@@ -30,6 +30,13 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
+                R.id.page_welcome -> {
+                    if (navController.currentDestination?.id != R.id.page_welcome) {
+                        navController.navigate(R.id.page_welcome)
+                    }
+                    true
+                }
+
                 R.id.page_productos -> {
                     if (navController.currentDestination?.id != R.id.page_productos) {
                         navController.navigate(R.id.page_productos)
