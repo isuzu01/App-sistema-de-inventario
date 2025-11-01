@@ -3,6 +3,7 @@ package com.example.inventarioapp.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.inventarioapp.entity.ProveedorEntity
@@ -24,7 +25,7 @@ interface ProveedorDao {
     @Query("SELECT * FROM Proveedor WHERE id = :proveedorId")
     fun getProveedorById(proveedorId: Long): ProveedorEntity?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertProveedor(proveedorEntity: ProveedorEntity): Long
 
     @Update

@@ -26,8 +26,6 @@ interface ProductoDao {
     @Query("SELECT * FROM Producto WHERE id = :productoId")
     fun getProductoById(productoId: Long): ProductoEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertProducto(productoEntity: ProductoEntity):Long
 
     //
     //total productos
@@ -46,6 +44,8 @@ interface ProductoDao {
     @Query("SELECT SUM(stock) FROM Producto")
     fun getSumaTotalStockUnits(): LiveData<Int>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertProducto(productoEntity: ProductoEntity):Long
 
     @Update
     fun updateProducto(productoEntity: ProductoEntity)

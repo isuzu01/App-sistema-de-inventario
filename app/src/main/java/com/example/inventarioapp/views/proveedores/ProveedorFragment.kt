@@ -21,6 +21,11 @@ import com.example.inventarioapp.dao.ProveedorDao
 import com.example.inventarioapp.database.InventarioDatabase
 import com.example.inventarioapp.databinding.FragmentProveedorBinding
 import com.example.inventarioapp.entity.ProveedorEntity
+import com.example.inventarioapp.repository.FirebaseProveedorRepository
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,9 +67,24 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
             }
         }
 
-        loadAllProveedores(0)
+        //loadAllProveedores(0)
+        loadProveedoresFromFirebase()
+        FirebaseProveedorRepository.sincronizarProveedorDesdeFirebase(proveedorDao)
+        observarProveedoresEnTiempoReal()
     }
 
+    private fun observarProveedoresEnTiempoReal(){
+        FirebaseProveedorRepository.observarProveedoresEnTiempoReal { proveedores ->
+            if (!isAdded || _binding == null) return@observarProveedoresEnTiempoReal
+
+            lifecycleScope.launch(Dispatchers.Main){
+                if (_binding == null || !isAdded){
+                    mAdapter.submitList(proveedores)
+                    updateCountProveedores(proveedores.size)
+                }
+            }
+        }
+    }
     private fun setupSpinner() {
         val adapterSpinner = ArrayAdapter.createFromResource(
             requireContext(),
@@ -138,27 +158,56 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
             } else {
                 proveedorDao.searchProveedores(query)
             }
+            if (!isAdded || _binding == null) return@launch
             requireActivity().runOnUiThread {
-                mAdapter.submitList(proveedores)
-                updateCountProveedores(proveedores.size)
+                if (_binding != null && isAdded){
+                    mAdapter.submitList(proveedores)
+                    updateCountProveedores(proveedores.size)
+                }
             }
         }
     }
 
+    private fun loadProveedoresFromFirebase(){
+        val dbRef = FirebaseDatabase.getInstance().getReference("proveedores")
+
+        dbRef.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(!isAdded || _binding == null) return
+
+                val proveedoresList = mutableListOf<ProveedorEntity>()
+                for (provSnapshot in snapshot.children){
+                    val proveedor = provSnapshot.getValue(ProveedorEntity::class.java)
+                    proveedor?.let { proveedoresList.add(it) }
+                }
+
+                if(_binding != null && isAdded){
+                    mAdapter.submitList(proveedoresList)
+                    updateCountProveedores(proveedoresList.size)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                if(!isAdded || _binding == null) return
+                Toast.makeText(requireContext(), "Error al cargar datos: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
 
     private fun loadAllProveedores(sortPosition: Int) {
-        Thread {
+        lifecycleScope.launch(Dispatchers.IO) {
             val proveedores = when (sortPosition) {
                 1 -> proveedorDao.getProveedoresOrderByNombreEmpresa()
                 2 -> proveedorDao.getProveedoresOrderByCorreo()
                 else -> proveedorDao.getAllProveedores()
             }
+            if (!isAdded || _binding == null) return@launch
             requireActivity().runOnUiThread {
                 mAdapter.submitList(proveedores)
                 updateCountProveedores(proveedores.size)
             }
-        }.start()
+        }
     }
 
 
@@ -193,18 +242,28 @@ class ProveedorFragment : Fragment(R.layout.fragment_proveedor){
 
     private fun deleteProveedor(proveedor: ProveedorEntity) {
         lifecycleScope.launch(Dispatchers.IO) {
-            proveedorDao.deleteProveedor(proveedor)
+            try {
+                FirebaseProveedorRepository.eliminarProveedorFirebaseYRoom(proveedorDao, proveedor)
+                if (!isAdded || _binding == null) return@launch
 
-            withContext(Dispatchers.Main) {
-                Toast.makeText(requireContext(), "Proveedor ${proveedor.nombreEmpresa} eliminado.", Toast.LENGTH_SHORT).show()
+                withContext(Dispatchers.Main) {
+                    if ( _binding != null && isAdded){
+                        Toast.makeText(requireContext(), "Proveedor ${proveedor.nombreEmpresa} eliminado.", Toast.LENGTH_SHORT).show()
 
-                val currentPosition = binding.spinnerSort.selectedItemPosition
-                loadAllProveedores(currentPosition)
+                        val currentPosition = binding.spinnerSort.selectedItemPosition
+                        loadAllProveedores(currentPosition)
+                    }
+                }
+            }catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 
     private fun updateCountProveedores(count: Int) {
+        if (_binding == null || !isAdded) return
         binding.tvProveedorCount.text = "$count proveedor(es) encontrado(s)"
     }
 

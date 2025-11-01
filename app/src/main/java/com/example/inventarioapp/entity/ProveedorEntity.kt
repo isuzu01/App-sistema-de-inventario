@@ -18,4 +18,7 @@ data class ProveedorEntity(
     var nombreContacto: String = "" ,
     var correo: String = "",
     var telefono: String = "")
+{
+         constructor():this(0,"","",true,"","","","")
+}
 
