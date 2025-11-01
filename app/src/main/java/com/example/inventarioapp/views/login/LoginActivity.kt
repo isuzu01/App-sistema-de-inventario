@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.inventarioapp.databinding.ActivityLoginBinding
+import com.example.inventarioapp.utils.Constantes
 import com.example.inventarioapp.views.splashscreen.SplashScreenActivity
 
 class LoginActivity : AppCompatActivity() {
@@ -31,14 +32,22 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Aquí puedes agregar validación más compleja después si quieres
-            // Por ahora solo ingresa y va al Splash
-            Toast.makeText(this, "¡Bienvenido $usuario!", Toast.LENGTH_SHORT).show()
+            // Validación de credenciales
+            if (usuario == Constantes.USUARIO_CORRECTO && password == Constantes.PASSWORD_CORRECTO) {
+                // Login exitoso
+                Toast.makeText(this, "¡Bienvenido $usuario!", Toast.LENGTH_SHORT).show()
 
-            // Ahora va al SplashScreen después del login
-            val intent = Intent(this, SplashScreenActivity::class.java)
-            startActivity(intent)
-            finish()
+                val intent = Intent(this, SplashScreenActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else {
+                // Login fallido
+                Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_LONG).show()
+
+                // Opcional: Limpiar campos
+                binding.etPassword.text?.clear()
+                binding.etPassword.requestFocus()
+            }
         }
     }
 }
