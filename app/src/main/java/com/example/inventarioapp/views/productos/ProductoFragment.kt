@@ -273,18 +273,6 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
             }
         }
 
-       /* lifecycleScope.launch(Dispatchers.IO) {
-            productoDao.deleteProducto(producto)
-
-            withContext(Dispatchers.Main) {
-                Toast.makeText(requireContext(), "Producto ${producto.descripcion} eliminado.", Toast.LENGTH_SHORT).show()
-
-                val currentPosition = binding.spinnerSort.selectedItemPosition
-                loadAllProductos(currentPosition)
-            }
-        }
-
-        */
     }
 
     private fun updateCountProductos(count: Int) {

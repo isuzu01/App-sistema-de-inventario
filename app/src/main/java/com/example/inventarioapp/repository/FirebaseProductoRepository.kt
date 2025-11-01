@@ -20,20 +20,7 @@ object FirebaseProductoRepository {
 
     private const val TAG = "FirebaseProductoRepo"
     private var isSyncing = false
-/*
-    suspend fun subirImagenFirebase(uri: Uri?): String? {
-        if (uri == null) return null
-        return try {
-            val storageRef = FirebaseStorage.getInstance()
-                .getReference("imagenes_productos/${UUID.randomUUID()}")
-            storageRef.putFile(uri).await()
-            storageRef.downloadUrl.await().toString()
-        } catch (e: Exception) {
-            Log.e("FirebaseUpload", "Error al subir imagen: ${e.message}")
-            null
-        }
-    }
-*/
+
     suspend fun insertarProductoFirebaseYRoom(productoDao: ProductoDao, producto: ProductoEntity) {
         withContext(Dispatchers.IO) {
 
