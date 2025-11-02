@@ -17,10 +17,6 @@
     <string name="hint_telefono">Ingrese número de contacto</string>
     <string name="btn_cancelar">Cancelar</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="description_producto">Descripción del producto</string>
 
-    <string name="image_url_hint">https://ejemplo.com/imagen.jpg</string>
-    <string name="load_image">Cargar Imagen</string>
-    <string name="product_image">Imagen del producto</string>
 </resources>

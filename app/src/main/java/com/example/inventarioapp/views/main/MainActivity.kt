@@ -5,9 +5,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.example.inventarioapp.R
 import com.example.inventarioapp.databinding.ActivityMainBinding
@@ -82,6 +82,20 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         binding.bottomNavigationView.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                // ❌ Ocultar menú en estos fragments
+                R.id.page_producto_form,
+                R.id.page_proveedor_form -> {
+                    binding.bottomNavigationView.visibility = View.GONE
+                }
+                // ✅ Mostrar menú en el resto
+                else -> {
+                    binding.bottomNavigationView.visibility = View.VISIBLE
+                }
+            }
+        }
 
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
