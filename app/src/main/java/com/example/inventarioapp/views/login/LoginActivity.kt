@@ -32,6 +32,14 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Guardar el nombre de usuario en SharedPreferences
+            val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
+            prefs.edit().apply {
+                putString("usuario_nombre", usuario)
+                putBoolean("is_logged_in", true)
+                apply()
+            }
+
             // Validación de credenciales
             if (usuario == Constantes.USUARIO_CORRECTO && password == Constantes.PASSWORD_CORRECTO) {
                 // Login exitoso
@@ -47,6 +55,10 @@ class LoginActivity : AppCompatActivity() {
                 // Opcional: Limpiar campos
                 binding.etPassword.text?.clear()
                 binding.etPassword.requestFocus()
+
+                val intent = Intent(this, SplashScreenActivity::class.java)
+                startActivity(intent)
+                finish()
             }
         }
     }
