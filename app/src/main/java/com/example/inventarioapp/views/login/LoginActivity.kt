@@ -32,16 +32,17 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Guardar el nombre de usuario en SharedPreferences
-            val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
-            prefs.edit().apply {
-                putString("usuario_nombre", usuario)
-                putBoolean("is_logged_in", true)
-                apply()
-            }
-
             // Validación de credenciales
             if (usuario == Constantes.USUARIO_CORRECTO && password == Constantes.PASSWORD_CORRECTO) {
+
+                // Guardar el nombre de usuario en SharedPreferences
+                val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                prefs.edit().apply {
+                    putString("usuario_nombre", usuario)
+                    putBoolean("is_logged_in", true)
+                    apply()
+                }
+
                 // Login exitoso
                 Toast.makeText(this, "¡Bienvenido $usuario!", Toast.LENGTH_SHORT).show()
 
@@ -56,9 +57,6 @@ class LoginActivity : AppCompatActivity() {
                 binding.etPassword.text?.clear()
                 binding.etPassword.requestFocus()
 
-                val intent = Intent(this, SplashScreenActivity::class.java)
-                startActivity(intent)
-                finish()
             }
         }
     }
