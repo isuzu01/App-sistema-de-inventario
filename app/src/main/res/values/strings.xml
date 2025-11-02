@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">InventarioApp</string>
+    <string name="app_name">Geminysllab</string>
 
     <string name="lbl_nombre_empresa">Nombre de la empresa</string>
     <string name="hint_nombre_empresa">Razón social / Nombre comercial</string>
