@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-        supportActionBar?.title = "GeminysLab"
+        supportActionBar?.title = "GenesysLap"
 
         setupNavegacion()
     }
