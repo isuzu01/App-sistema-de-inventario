@@ -3,7 +3,6 @@ package com.example.inventarioapp.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.R
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -13,7 +12,8 @@ import com.example.inventarioapp.entity.ProductoEntity
 
 class ProductoAdapter(
     private val onClick: (Long) -> Unit,
-    private val onLongClick: (ProductoEntity) -> Boolean) :
+    private val onLongClick: (ProductoEntity) -> Boolean
+) :
     ListAdapter<ProductoEntity, ProductoAdapter.ViewHolder>(ProductoDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductoAdapter.ViewHolder {
@@ -37,6 +37,7 @@ class ProductoAdapter(
             true
         }
     }
+
     inner class ViewHolder(val binding: ItemRvProductoBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(producto: ProductoEntity) {
@@ -54,7 +55,7 @@ class ProductoAdapter(
                     .load(producto.imagenUrl)
                     .centerCrop()
                     .into(binding.imgPhoto)
-            }else {
+            } else {
                 binding.imgPhoto.setImageResource(android.R.drawable.ic_menu_gallery)
             }
         }

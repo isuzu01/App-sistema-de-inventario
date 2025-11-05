@@ -29,8 +29,8 @@ class ProductoFormFragment : Fragment() {
     private var _binding: FragmentProductoFormBinding? = null
     private val binding get() = _binding!!
 
-    private  lateinit var productoDao: ProductoDao
-    private  lateinit var proveedorDao: ProveedorDao
+    private lateinit var productoDao: ProductoDao
+    private lateinit var proveedorDao: ProveedorDao
 
     private val args: ProductoFormFragmentArgs by navArgs()
     private var productoExistente: ProductoEntity? = null
@@ -39,7 +39,8 @@ class ProductoFormFragment : Fragment() {
     private val action = ProductoFormFragmentDirections.actionBackToProductos()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentProductoFormBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -58,11 +59,12 @@ class ProductoFormFragment : Fragment() {
         if (productoId > 0) {
             loadProducto(productoId)
             binding.btnSave.text = "Actualizar"
+        } else {
+            binding.btnSave.text = "Guardar"
         }
-        else { binding.btnSave.text = "Guardar" }
 
         binding.btnSave.setOnClickListener { saveOrUpdateProducto() }
-        binding.btnCancel.setOnClickListener {findNavController().navigate(action)}
+        binding.btnCancel.setOnClickListener { findNavController().navigate(action) }
 
     }
 
@@ -87,7 +89,9 @@ class ProductoFormFragment : Fragment() {
     private fun loadImageFromUrl() {
         val imageUrl = binding.etImagenUrl.text.toString().trim()
 
-        if (imageUrl.isEmpty()) { return }
+        if (imageUrl.isEmpty()) {
+            return
+        }
 
         binding.progressBarImagen.visibility = View.VISIBLE
         lifecycleScope.launch(Dispatchers.IO) {
@@ -100,7 +104,8 @@ class ProductoFormFragment : Fragment() {
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     binding.progressBarImagen.visibility = View.GONE
-                    Toast.makeText(requireContext(), "Error al cargar imagen", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Error al cargar imagen", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
@@ -161,18 +166,21 @@ class ProductoFormFragment : Fragment() {
             }
         }
     }
+
     private fun saveOrUpdateProducto() {
-        if(!validateFields()) {return}
+        if (!validateFields()) {
+            return
+        }
 
         val producto = ProductoEntity(
             id = productoExistente?.id ?: 0,
             descripcion = binding.etDescripcion.text.toString().trim(),
             marca = binding.etMarca.text.toString().trim(),
             modelo = binding.etModelo.text.toString().trim(),
-            precio = binding.etPrecio.text.toString().toDoubleOrNull()?:0.0,
-            stock = binding.etStock.text.toString().toIntOrNull()?: 0,
-            nomProveedor = binding.spiProveedor.selectedItem?.toString()?.trim()?: "Sin proveedor",
-            nomCategoria = binding.spiCategoria.selectedItem?.toString()?.trim()?: "",
+            precio = binding.etPrecio.text.toString().toDoubleOrNull() ?: 0.0,
+            stock = binding.etStock.text.toString().toIntOrNull() ?: 0,
+            nomProveedor = binding.spiProveedor.selectedItem?.toString()?.trim() ?: "Sin proveedor",
+            nomCategoria = binding.spiCategoria.selectedItem?.toString()?.trim() ?: "",
             imagenUrl = binding.etImagenUrl.text.toString().trim()
         )
 
@@ -181,7 +189,10 @@ class ProductoFormFragment : Fragment() {
             try {
 
                 if (productoExistente != null) {
-                    FirebaseProductoRepository.actualizarProductoFirebaseYRoom(productoDao, producto)
+                    FirebaseProductoRepository.actualizarProductoFirebaseYRoom(
+                        productoDao,
+                        producto
+                    )
                 } else {
                     FirebaseProductoRepository.insertarProductoFirebaseYRoom(productoDao, producto)
                 }
@@ -189,7 +200,8 @@ class ProductoFormFragment : Fragment() {
                 //FirebaseProductoRepository.insertarProductoFirebaseYRoom(productoDao, producto)
 
                 withContext(Dispatchers.Main) {
-                    val msg = if (productoExistente != null) "Producto actualizado" else "Producto agregado"
+                    val msg =
+                        if (productoExistente != null) "Producto actualizado" else "Producto agregado"
                     Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
 
                     // Notificar actualización
@@ -201,7 +213,8 @@ class ProductoFormFragment : Fragment() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT)
+                        .show()
                     e.printStackTrace()
                 }
             }

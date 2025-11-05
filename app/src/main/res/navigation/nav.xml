@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--suppress NavigationFile -->
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav"
     app:startDestination="@id/page_welcome">
 
 
@@ -23,7 +22,7 @@
         <!-- Acciones -->
         <action
             android:id="@+id/action_to_form_proveedor"
-            app:destination="@id/page_proveedor_form"/>
+            app:destination="@id/page_proveedor_form" />
 
     </fragment>
 
@@ -38,8 +37,8 @@
         <!-- Acción para regresar al listado-->
         <argument
             android:name="proveedorId"
-            app:argType="long"
-            android:defaultValue="0L"/>
+            android:defaultValue="0L"
+            app:argType="long" />
 
     </fragment>
 
@@ -52,7 +51,7 @@
 
         <action
             android:id="@+id/action_to_form_producto"
-            app:destination="@id/page_producto_form"/>
+            app:destination="@id/page_producto_form" />
 
     </fragment>
 
@@ -63,8 +62,8 @@
         tools:layout="@layout/fragment_producto_form">
         <argument
             android:name="productoId"
-            app:argType="long"
-            android:defaultValue="0L"/>
+            android:defaultValue="0L"
+            app:argType="long" />
 
         <action
             android:id="@+id/action_back_to_productos"

@@ -12,11 +12,10 @@ data class ProductoEntity(
     var modelo: String = "",
     var precio: Double = 0.0,
     var stock: Int = 0,
-    var nomProveedor: String ="",
-    var nomCategoria: String ="",
+    var nomProveedor: String = "",
+    var nomCategoria: String = "",
     var imagenUrl: String = ""
-    )
-{
+) {
     // Constructor vacío requerido por Firebase
     constructor() : this(0, "", "", "", 0.0, 0, "", "", "")
 

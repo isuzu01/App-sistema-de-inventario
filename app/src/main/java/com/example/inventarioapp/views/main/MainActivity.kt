@@ -1,12 +1,12 @@
 package com.example.inventarioapp.views.main
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.inventarioapp.R
@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         setupNavegacion()
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main_toolbar, menu)
         return true
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
                 mostrarDialogoUsuario()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -64,6 +66,7 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
+
     private fun cerrarSesion() {
         // Limpiar datos de sesión
         val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
@@ -75,6 +78,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
     private fun setupNavegacion() {
         binding.bottomNavigationView.itemIconTintList = null
         val navHostFragment = supportFragmentManager
@@ -112,12 +116,14 @@ class MainActivity : AppCompatActivity() {
                     }
                     true
                 }
+
                 R.id.page_proveedores -> {
                     if (navController.currentDestination?.id != R.id.page_proveedores) {
                         navController.navigate(R.id.page_proveedores)
                     }
                     true
                 }
+
                 else -> false
             }
         }

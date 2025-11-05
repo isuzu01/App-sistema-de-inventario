@@ -4,13 +4,13 @@
     <item
         android:id="@+id/page_welcome"
         android:icon="@drawable/boton_inicio"
-        android:title="Inicio"/>
+        android:title="Inicio" />
     <item
         android:id="@+id/page_productos"
         android:icon="@drawable/boton_producto"
-        android:title="Prductos"/>
+        android:title="Prductos" />
     <item
         android:id="@+id/page_proveedores"
         android:icon="@drawable/boton_proveedor"
-        android:title="Proveedores"/>
+        android:title="Proveedores" />
 </menu>

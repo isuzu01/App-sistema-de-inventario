@@ -3,7 +3,6 @@ package com.example.inventarioapp.views.productos
 import android.os.Bundle
 import android.text.TextWatcher
 import android.view.LayoutInflater
-import androidx.fragment.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -11,11 +10,12 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.inventarioapp.adapters.ProductoAdapter
 import com.example.inventarioapp.R
+import com.example.inventarioapp.adapters.ProductoAdapter
 import com.example.inventarioapp.dao.ProductoDao
 import com.example.inventarioapp.database.InventarioDatabase
 import com.example.inventarioapp.databinding.FragmentProductoBinding
@@ -32,8 +32,8 @@ import kotlinx.coroutines.withContext
 
 class ProductoFragment : Fragment(R.layout.fragment_producto) {
 
-    private  var _binding: FragmentProductoBinding? = null
-    private  val binding get() = _binding!!
+    private var _binding: FragmentProductoBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var mAdapter: ProductoAdapter
     private lateinit var productoDao: ProductoDao
@@ -42,10 +42,12 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
     private var firebaseListener: ValueEventListener? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentProductoBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -59,11 +61,16 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
 
         parentFragmentManager.setFragmentResultListener(
             "producto_actualizar",
-            viewLifecycleOwner) { _, bundle ->
+            viewLifecycleOwner
+        ) { _, bundle ->
             if (bundle.getBoolean("actualizar", false)) {
                 val currentPosition = binding.spinnerSort.selectedItemPosition
                 loadAllProductos(currentPosition)
-                Toast.makeText(requireContext(), "Lista de producto actualizada.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Lista de producto actualizada.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -89,7 +96,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
         }
     }
 
-    private fun setupSpinner(){
+    private fun setupSpinner() {
         val adapterSpinner = ArrayAdapter.createFromResource(
             requireContext(),
             R.array.sort_options_Producto,
@@ -98,17 +105,24 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerSort.adapter = adapterSpinner
         binding.spinnerSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View,
+                position: Int,
+                id: Long
+            ) {
                 loadAllProductos(position)
             }
-            override fun onNothingSelected(parent: AdapterView<*>) { }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
     private fun setupRecyclerView() {
         mAdapter = ProductoAdapter(
-            onClick = { productoId:Long -> onProductoClick(productoId) },
-            onLongClick = { producto: ProductoEntity ->showDeleteConfirmationDialog(producto)
+            onClick = { productoId: Long -> onProductoClick(productoId) },
+            onLongClick = { producto: ProductoEntity ->
+                showDeleteConfirmationDialog(producto)
                 true
             }
         )
@@ -135,15 +149,17 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
         binding.ibtnAdd.setOnClickListener {
             findNavController().navigate(
                 R.id.action_to_form_producto,
-                Bundle().apply{ putLong("productoId", 0L) })
+                Bundle().apply { putLong("productoId", 0L) })
         }
     }
+
     private fun onProductoClick(productoId: Long) {
         val bundle = Bundle().apply {
             putLong("productoId", productoId)
         }
         findNavController().navigate(
-            R.id.action_to_form_producto, bundle)
+            R.id.action_to_form_producto, bundle
+        )
 
     }
 
@@ -195,7 +211,11 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
             override fun onCancelled(error: DatabaseError) {
                 // AGREGADO: Verificar que el Fragment esté activo
                 if (!isAdded || _binding == null) return
-                Toast.makeText(requireContext(), "Error al cargar datos: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error al cargar datos: ${error.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         })
     }
@@ -211,7 +231,7 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
             requireActivity().runOnUiThread {
                 binding.rvProductos.itemAnimator = null
 
-                mAdapter.submitList(productos){
+                mAdapter.submitList(productos) {
                     (binding.rvProductos.layoutManager as? LinearLayoutManager)
                         ?.scrollToPositionWithOffset(0, 0)
                 }
@@ -221,18 +241,20 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
     }
 
     private fun showDeleteConfirmationDialog(producto: ProductoEntity) {
-        val iconDrawable = ContextCompat.getDrawable(requireContext(), android.R.drawable.ic_menu_delete)
+        val iconDrawable =
+            ContextCompat.getDrawable(requireContext(), android.R.drawable.ic_menu_delete)
 
         iconDrawable?.let { drawable ->
             val wrappedDrawable = DrawableCompat.wrap(drawable).mutate()
-            DrawableCompat.setTint(wrappedDrawable, ContextCompat.getColor(requireContext(), R.color.red)
+            DrawableCompat.setTint(
+                wrappedDrawable, ContextCompat.getColor(requireContext(), R.color.red)
             )
         }
 
         val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle(" Eliminar Producto")
             .setMessage("¿Desea eliminar el producto?: ${producto.descripcion}?")
-            .setPositiveButton("Sí") { _, _ ->deleteProducto(producto)}
+            .setPositiveButton("Sí") { _, _ -> deleteProducto(producto) }
             .setNegativeButton("No", null)
             .create()
 
@@ -268,7 +290,11 @@ class ProductoFragment : Fragment(R.layout.fragment_producto) {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Error al eliminar: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Error al eliminar: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }

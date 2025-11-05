@@ -1,16 +1,12 @@
 package com.example.inventarioapp.views.welcome
 
+//
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import java.text.SimpleDateFormat
-import java.util.*
-//
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.inventarioapp.R
 import com.example.inventarioapp.adapters.ProductoAdapter
@@ -19,6 +15,9 @@ import com.example.inventarioapp.dao.ProductoDao
 import com.example.inventarioapp.database.InventarioDatabase
 import com.example.inventarioapp.databinding.FragmentWelcomeBinding
 import com.example.inventarioapp.entity.Tendencia
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class WelcomeFragment : Fragment() {
@@ -86,13 +85,41 @@ class WelcomeFragment : Fragment() {
     //datos del carrusel
     private fun getTendenciasFijas(): List<Tendencia> {
         return listOf(
-            Tendencia("El futuro de la IA: ¿Cómo será mañana?", "The National", R.drawable.tendencia_ia),
-            Tendencia("Intel lanza la nueva generación de chips", "Reuters Tech", R.drawable.tendencia_chips),
-            Tendencia("5 claves para mantener la seguridad de tu laptop", "Tech Magazine", R.drawable.tendencia_seguridad),
-            Tendencia("Las mejores laptops gaming del 2025", "PC Gamer", R.drawable.tendencia_laptops),
-            Tendencia("El nuevo estándar de velocidad en SSDs", "Hardware Insider", R.drawable.tendencia_ssd),
-            Tendencia("Por qué el 5G cambiará el trabajo remoto", "World Telecom", R.drawable.tendencia_5g),
-            Tendencia("Los retos de la ciberseguridad en 2026", "Security Today", R.drawable.tendencia_ciber),
+            Tendencia(
+                "El futuro de la IA: ¿Cómo será mañana?",
+                "The National",
+                R.drawable.tendencia_ia
+            ),
+            Tendencia(
+                "Intel lanza la nueva generación de chips",
+                "Reuters Tech",
+                R.drawable.tendencia_chips
+            ),
+            Tendencia(
+                "5 claves para mantener la seguridad de tu laptop",
+                "Tech Magazine",
+                R.drawable.tendencia_seguridad
+            ),
+            Tendencia(
+                "Las mejores laptops gaming del 2025",
+                "PC Gamer",
+                R.drawable.tendencia_laptops
+            ),
+            Tendencia(
+                "El nuevo estándar de velocidad en SSDs",
+                "Hardware Insider",
+                R.drawable.tendencia_ssd
+            ),
+            Tendencia(
+                "Por qué el 5G cambiará el trabajo remoto",
+                "World Telecom",
+                R.drawable.tendencia_5g
+            ),
+            Tendencia(
+                "Los retos de la ciberseguridad en 2026",
+                "Security Today",
+                R.drawable.tendencia_ciber
+            ),
         )
     }
 
@@ -104,15 +131,16 @@ class WelcomeFragment : Fragment() {
         val tendenciasAdapter = TendenciaAdapter(tendencias)
 
         binding.rvInformacionEmpresa.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            layoutManager =
+                LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             adapter = infoAdapter
         }
 
         binding.rvTendencias.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            layoutManager =
+                LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             adapter = tendenciasAdapter
         }
-
 
 
 // Texto "Ver"

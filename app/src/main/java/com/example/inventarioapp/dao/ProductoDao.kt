@@ -17,6 +17,7 @@ interface ProductoDao {
 
     @Query("SELECT * FROM Producto WHERE descripcion LIKE :query || '%' OR id LIKE :query || '%'")
     fun searchProductos(query: String): List<ProductoEntity>
+
     @Query("SELECT * FROM Producto ORDER BY descripcion ASC")
     fun getProductosOrderByDescripcion(): List<ProductoEntity>
 
@@ -45,7 +46,7 @@ interface ProductoDao {
     fun getSumaTotalStockUnits(): LiveData<Int>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertProducto(productoEntity: ProductoEntity):Long
+    fun insertProducto(productoEntity: ProductoEntity): Long
 
     @Update
     fun updateProducto(productoEntity: ProductoEntity)

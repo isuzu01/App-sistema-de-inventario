@@ -1,6 +1,5 @@
 package com.example.inventarioapp.repository
 
-import android.net.Uri
 import android.util.Log
 import com.example.inventarioapp.dao.ProductoDao
 import com.example.inventarioapp.entity.ProductoEntity
@@ -8,13 +7,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import java.util.UUID
 
 object FirebaseProductoRepository {
 
@@ -32,7 +29,7 @@ object FirebaseProductoRepository {
                 dbRef.child(newId.toString()).setValue(productoConId).await()
 
                 Log.d(TAG, "Producto guardado - Room ID: $newId, Firebase ID: $newId")
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 Log.e(TAG, "Error al guardar producto: ${e.message}", e)
                 throw e
             }
@@ -40,7 +37,10 @@ object FirebaseProductoRepository {
         }
     }
 
-    suspend fun actualizarProductoFirebaseYRoom(productoDao: ProductoDao, producto: ProductoEntity) {
+    suspend fun actualizarProductoFirebaseYRoom(
+        productoDao: ProductoDao,
+        producto: ProductoEntity
+    ) {
         withContext(Dispatchers.IO) {
             try {
                 // Actualizar en Room
@@ -116,7 +116,8 @@ object FirebaseProductoRepository {
                         // Insertar o actualizar productos de Firebase
                         for (firebaseProducto in productosFirebase) {
                             try {
-                                val productoExistente = productoDao.getProductoById(firebaseProducto.id)
+                                val productoExistente =
+                                    productoDao.getProductoById(firebaseProducto.id)
 
                                 if (productoExistente == null) {
                                     // Insertar nuevo producto
@@ -128,11 +129,17 @@ object FirebaseProductoRepository {
                                     }
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG, "Error sincronizando producto ID ${firebaseProducto.id}: ${e.message}")
+                                Log.e(
+                                    TAG,
+                                    "Error sincronizando producto ID ${firebaseProducto.id}: ${e.message}"
+                                )
                             }
                         }
 
-                        Log.d(TAG, "Sincronización completada. Productos: ${productosFirebase.size}")
+                        Log.d(
+                            TAG,
+                            "Sincronización completada. Productos: ${productosFirebase.size}"
+                        )
 
                     } catch (e: Exception) {
                         Log.e(TAG, "Error en sincronización: ${e.message}", e)

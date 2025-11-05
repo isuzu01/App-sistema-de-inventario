@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center">
+    android:padding="24dp">
 
     <!-- Ícono de usuario -->
     <ImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:src="@android:drawable/ic_menu_myplaces"
         android:layout_marginBottom="16dp"
+        android:src="@android:drawable/ic_menu_myplaces"
         app:tint="@color/orange" />
 
     <!-- Nombre del usuario -->
@@ -20,29 +20,29 @@
         android:id="@+id/tvUserName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:text="Hola, Usuario"
-        android:textSize="22sp"
-        android:textStyle="bold"
         android:textColor="@color/black"
-        android:layout_marginBottom="8dp" />
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
     <!-- Separador -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/plomo"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:background="@color/plomo" />
 
     <!-- Botón Cerrar Sesión -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCerrarSesion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Cerrar Sesión"
-        android:textSize="16sp"
-        android:textColor="@color/white"
         android:backgroundTint="@color/red"
+        android:text="Cerrar Sesión"
+        android:textColor="@color/white"
+        android:textSize="16sp"
         app:cornerRadius="8dp"
         app:icon="@android:drawable/ic_lock_power_off"
         app:iconGravity="textStart" />

@@ -37,7 +37,7 @@ android {
         jvmTarget = "1.8"
     }
 
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
     }
 }
@@ -75,10 +75,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
 
     // FirebaseUI for Firebase Realtime Database
-    implementation ("com.firebaseui:firebase-ui-database:8.0.2")
+    implementation("com.firebaseui:firebase-ui-database:8.0.2")
 
     // FirebaseUI for Firebase Auth
-    implementation ("com.firebaseui:firebase-ui-auth:8.0.2")
+    implementation("com.firebaseui:firebase-ui-auth:8.0.2")
 
 
     // Import the Firebase BoM

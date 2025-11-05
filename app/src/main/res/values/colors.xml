@@ -12,17 +12,11 @@
     <!-- Paleta principal -->
     <color name="primary">#5574b4</color>
     <color name="primary_dark">#405795</color>
-    <color name="primary_darker">#2a3a76</color>
-    <color name="primary_darkest">#151d57</color>
     <color name="primary_navy">#000038</color>
 
     <color name="secondary">#4d649e</color>
-    <color name="secondary_light">#7a8bb6</color>
     <color name="tertiary">#a6b2ce</color>
     <color name="background_light">#d3d8e7</color>
 
     <!-- Estados -->
-    <color name="success">#28A745</color>
-    <color name="warning">#FFC107</color>
-    <color name="error">#DC3545</color>
 </resources>

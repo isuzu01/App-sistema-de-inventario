@@ -11,14 +11,14 @@ data class ProveedorEntity(
     //DATOS DE LA EMPRESA
     var nombreEmpresa: String = "",
     var ruc: String = "",
-    var esNacional:Boolean= true,
+    var esNacional: Boolean = true,
     var direccion: String = "",
 
     //DATOS contacto
-    var nombreContacto: String = "" ,
+    var nombreContacto: String = "",
     var correo: String = "",
-    var telefono: String = "")
-{
-         constructor():this(0,"","",true,"","","","")
+    var telefono: String = ""
+) {
+    constructor() : this(0, "", "", true, "", "", "", "")
 }
 

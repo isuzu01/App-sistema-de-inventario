@@ -10,7 +10,8 @@ import com.example.inventarioapp.entity.ProveedorEntity
 
 class ProveedorAdapter(
     private val onClick: (Long) -> Unit,
-    private val onLongClick: (ProveedorEntity) -> Boolean) :
+    private val onLongClick: (ProveedorEntity) -> Boolean
+) :
     ListAdapter<ProveedorEntity, ProveedorAdapter.ViewHolder>(ProveedorDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -43,6 +44,7 @@ class ProveedorAdapter(
         }
     }
 }
+
 class ProveedorDiffCallback : DiffUtil.ItemCallback<ProveedorEntity>() {
     override fun areItemsTheSame(oldItem: ProveedorEntity, newItem: ProveedorEntity): Boolean {
         return oldItem.id == newItem.id

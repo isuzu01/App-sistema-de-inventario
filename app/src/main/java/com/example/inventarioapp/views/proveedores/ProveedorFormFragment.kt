@@ -1,11 +1,11 @@
 package com.example.inventarioapp.views.proveedores
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -53,10 +53,10 @@ class ProveedorFormFragment : Fragment() {
 
         // Configurar botones
         binding.btnSave.setOnClickListener { saveOrUpdateProveedor() }
-        binding.btnCancel.setOnClickListener {  findNavController().navigate(R.id.page_proveedores) }
+        binding.btnCancel.setOnClickListener { findNavController().navigate(R.id.page_proveedores) }
     }
 
-    private fun loadProveedor(id:Long){
+    private fun loadProveedor(id: Long) {
         lifecycleScope.launch(Dispatchers.IO) {
             val proveedor = proveedorDao.getProveedorById(id)
             proveedorExistente = proveedor
@@ -74,6 +74,7 @@ class ProveedorFormFragment : Fragment() {
             }
         }
     }
+
     private fun saveOrUpdateProveedor() {
         if (!validateFields()) {
             return
@@ -94,17 +95,23 @@ class ProveedorFormFragment : Fragment() {
             try {
                 if (proveedorExistente != null) {
 
-                    FirebaseProveedorRepository.actualizarProveedorFirabaseYRoom(proveedorDao,proveedor)
+                    FirebaseProveedorRepository.actualizarProveedorFirabaseYRoom(
+                        proveedorDao,
+                        proveedor
+                    )
                 } else {
-                    FirebaseProveedorRepository.insetarProveedorFirebaseYRoom(proveedorDao,proveedor)
+                    FirebaseProveedorRepository.insetarProveedorFirebaseYRoom(
+                        proveedorDao,
+                        proveedor
+                    )
                 }
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     val mensaje = if (proveedorExistente != null)
                         "Proveedor actualizado correctamente!"
                     else
                         "Proveedor agregado correctamente!"
 
-                    Toast.makeText(requireContext(),  mensaje, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), mensaje, Toast.LENGTH_SHORT).show()
 
                     parentFragmentManager.setFragmentResult(
                         "proveedor_actualizar",
@@ -113,9 +120,13 @@ class ProveedorFormFragment : Fragment() {
 
                     findNavController().navigate(R.id.page_proveedores)
                 }
-            }catch (e: Exception){
-                withContext(Dispatchers.IO){
-                    Toast.makeText(requireContext(), "Error al guardar el proveedor.", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                withContext(Dispatchers.IO) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Error al guardar el proveedor.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     e.message
                 }
             }
@@ -144,6 +155,7 @@ class ProveedorFormFragment : Fragment() {
 
         return isValid
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
